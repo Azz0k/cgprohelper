@@ -1,16 +1,25 @@
-﻿using System.Linq;
+﻿using FluentFTP;
+using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 
 namespace CGProToCCAddressHelper
 {
     internal class Program
     {
+        static AppSettings appSettings;
         static HashSet<string> allowedRecipients = new HashSet<string>();
         static string baseDir = "";
-        static private string[] domains = {"@dcenergo.ru", "@tdenergospb.ru", "@energospb.ru", "@bcenergo.ru", "@dsolutions.tech", "@energo.am", "@frogsup.ru", "@helptomama.ru" };
+        static private string[] domains = {};
         static HashSet<string> allowedDomains = new HashSet<string>(domains);
         static async System.Threading.Tasks.Task Main(string[] args)
         {
+            var configuration = new ConfigurationBuilder().AddJsonFile($"appsettings.json");
+            var config = configuration.Build();
+            appSettings = config.GetSection("Settings").Get<AppSettings>();
+            domains = appSettings.allowedDomains;
+            await DownloadFullBaseAsync(appSettings.ConnectionSettings);
             string currentDir = Directory.GetCurrentDirectory();
             string recipientsFile = Path.Combine(currentDir, "allowedRecipients.csv");
             string baseIniFile = Path.Combine(currentDir, "baseDir.ini");
@@ -50,6 +59,17 @@ namespace CGProToCCAddressHelper
             }
 
 
+        }
+        public static async Task DownloadFullBaseAsync(AppConnectionSettings connectionSettings)
+        {
+            var token = new CancellationToken();
+            using (var ftp = new AsyncFtpClient(connectionSettings.host, connectionSettings.login, connectionSettings.password))
+            {
+                await ftp.Connect(token);
+                string currentDir = Directory.GetCurrentDirectory();
+                string recipientsFile = Path.Combine(currentDir, "allowedRecipients.csv");
+                await ftp.DownloadFile(recipientsFile, connectionSettings.emailsFullFileName, FtpLocalExists.Overwrite, FtpVerify.Retry, token: token);
+            }
         }
         static void ProcessMessage(string input)
         {

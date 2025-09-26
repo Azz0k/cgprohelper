@@ -29,17 +29,13 @@ namespace CGProToCCAddressHelper.Models
         {
             _isUpdateAllowed = true;
         }
-        public void ClearRecipients()
-        {
-            allowedRecipients.Clear();
-        }
         public void UpdateDomains(string[] domains)
         {
             allowedDomains = new HashSet<string>(domains);
         }
-        public void UpdateRecipients(List<string> recipients)
+        public void UpdateRecipients(HashSet<string> recipients)
         {
-            allowedRecipients = new HashSet<string>(recipients);
+            allowedRecipients = recipients;
         }
 
         public bool isAddressNotAllowed(string recipient)

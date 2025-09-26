@@ -21,21 +21,25 @@ namespace CGProToCCAddressHelper.Services
         public FtpService(AppSettings appSettings) 
         {
             _appSettings = appSettings;
+
             string currentDir = _appSettings.currentDir;
             string fileName = _appSettings.emailsLocalFullFileName;
             recipientsFile = Path.Combine(currentDir, fileName);
             emailsFullListFile.fullName = _appSettings.ConnectionSettings.emailsFullFileName;
         }
-        public async Task DownloadFullBaseIfNeededAsync(CancellationToken token)
+        public async Task<bool> DownloadFullBaseIfNeededAsync(CancellationToken token)
         {
+            bool result = false;
             updateSourceToken = token;
             await ChekIsThereDifferentFullEmailsFileOnFTP();
             if (needUpdateEmailsFullListFile)
             {
+                result = true;
                 await DownloadFullBaseAsync();
                 needUpdateEmailsFullListFile = false;
+                
             }
-
+            return result;
         }
         private async Task ExecuteAsync(Func<AsyncFtpClient, Task> operation)
         {

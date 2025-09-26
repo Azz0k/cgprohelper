@@ -16,7 +16,6 @@ namespace CGProToCCAddressHelper.Services
         private string recipientsFile;
         private CancellationTokenSource updateSource = new CancellationTokenSource();
         private FtpService _ftpService;
-        private MonitoredFile emailsFullListFile = new MonitoredFile();
         private int updateInterval = 60;
         public UpdateService(AppSettings appSettings, AllowedRecipients allowedRecipients, FtpService ftpService)
         {
@@ -26,7 +25,6 @@ namespace CGProToCCAddressHelper.Services
             string fileName = _appSettings.emailsLocalFullFileName;
             recipientsFile = Path.Combine(currentDir, fileName);
             _ftpService = ftpService;
-            emailsFullListFile.fullName = Path.Combine(_appSettings.currentDir, _appSettings.emailsLocalFullFileName);
             if (_appSettings.updateIntervalInSeconds > 0)
             {
                 updateInterval = _appSettings.updateIntervalInSeconds;  
@@ -38,32 +36,30 @@ namespace CGProToCCAddressHelper.Services
             await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
             ReadRecipientsFromFile();
             updateSource = new CancellationTokenSource();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             var backgroundTask = Task.Run(() => { BackGroundLoop(); }, updateSource.Token);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
+
         private async Task BackGroundLoop()
         {
             while (!updateSource.Token.IsCancellationRequested)
             {
                 await Task.Delay(1000 * updateInterval, updateSource.Token);
-                await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
-                if (isThereDifferentFullEmailsFileLocal() && _allowedRecipients.isUpdateAllowed)
+                bool needUpdateEmailsFullListFile = await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
+                if (needUpdateEmailsFullListFile)
                 {
+                    while (!_allowedRecipients.isUpdateAllowed || updateSource.Token.IsCancellationRequested)
+                    {
+                    }
                     ReadRecipientsFromFile();
                 }
             }
         }
-        private bool isThereDifferentFullEmailsFileLocal()
-        {
-            FileInfo fileInfo = new FileInfo(emailsFullListFile.fullName);
-            if (!fileInfo.Exists)
-            {
-                WriteErrorAndExit("");
-            }
-            return fileInfo.Length != emailsFullListFile.size || fileInfo.CreationTime!= emailsFullListFile.monitoredTime;
-        }
+
         private void ReadRecipientsFromFile()
         {
-            List<string> addresses = new List<string>();
+            HashSet<string> addresses = new HashSet<string>();
             try
             {
                 using (FileStream fs = File.Open(recipientsFile, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -81,7 +77,6 @@ namespace CGProToCCAddressHelper.Services
             {
                 WriteErrorAndExit(e.Message);
             }
-            _allowedRecipients.ClearRecipients();
             _allowedRecipients.UpdateRecipients(addresses);
         }
         private void WriteErrorAndExit(string message)

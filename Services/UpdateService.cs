@@ -29,7 +29,7 @@ namespace CGProToCCAddressHelper.Services
 
         public async Task UpdateDataFirstTime()
         {
-            await _ftpService.DownloadFullBaseIfNeededAsync();
+            await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
             ReadRecipientsFromFile();
             updateSource = new CancellationTokenSource();
             var backgroundTask = Task.Run(() => {BackGroundLoop(); }, updateSource.Token);
@@ -39,7 +39,7 @@ namespace CGProToCCAddressHelper.Services
             while (!updateSource.Token.IsCancellationRequested)
             {
                 await Task.Delay(1000*10, updateSource.Token);
-                await _ftpService.DownloadFullBaseIfNeededAsync();
+                await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
             }
         }
         private void ReadRecipientsFromFile()

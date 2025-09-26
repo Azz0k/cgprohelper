@@ -13,7 +13,7 @@ namespace CGProToCCAddressHelper.Services
     {
         private readonly AppSettings _appSettings;
         private string recipientsFile;
-        private CancellationTokenSource updateSource = new CancellationTokenSource();
+        private CancellationToken updateSourceToken = new CancellationTokenSource().Token;
         private FTPFile emailsFullListFile = new FTPFile();
         private bool needUpdateEmailsFullListFile = false;
         
@@ -26,8 +26,9 @@ namespace CGProToCCAddressHelper.Services
             recipientsFile = Path.Combine(currentDir, fileName);
             emailsFullListFile.fullName = _appSettings.ConnectionSettings.emailsFullFileName;
         }
-        public async Task DownloadFullBaseIfNeededAsync()
+        public async Task DownloadFullBaseIfNeededAsync(CancellationToken token)
         {
+            updateSourceToken = token;
             await ChekIsThereDifferentFullEmailsFileOnFTP();
             if (needUpdateEmailsFullListFile)
             {
@@ -43,7 +44,7 @@ namespace CGProToCCAddressHelper.Services
             {
                 using (var ftp = new AsyncFtpClient(connectionSettings.host, connectionSettings.login, connectionSettings.password))
                 {
-                    await ftp.Connect(updateSource.Token);
+                    await ftp.Connect(updateSourceToken);
                     await operation(ftp);
                 }
             }
@@ -82,7 +83,7 @@ namespace CGProToCCAddressHelper.Services
         {
             await ExecuteAsync(async (ftp) =>
             {
-                await ftp.DownloadFile(recipientsFile, _appSettings.ConnectionSettings.emailsFullFileName, FtpLocalExists.Overwrite, FtpVerify.Retry, token: updateSource.Token);
+                await ftp.DownloadFile(recipientsFile, _appSettings.ConnectionSettings.emailsFullFileName, FtpLocalExists.Overwrite, FtpVerify.Retry, token: updateSourceToken);
             });
         }
 

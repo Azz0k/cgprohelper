@@ -12,6 +12,8 @@ namespace CGProToCCAddressHelper.Models
         private readonly AppSettings _appSettings;
         private HashSet<string> allowedRecipients = new HashSet<string>();
         private HashSet<string> allowedDomains;
+        private bool _isUpdateAllowed = true;
+        public bool isUpdateAllowed {  get { return _isUpdateAllowed; } }
 
         public AllowedRecipients(AppSettings appSettings)
         {
@@ -19,6 +21,14 @@ namespace CGProToCCAddressHelper.Models
             allowedDomains = new HashSet<string>(appSettings.allowedDomains);
         }
 
+        public void DisableUpdates()
+        {
+            _isUpdateAllowed = false;
+        }
+        public void EnableUpdates()
+        {
+            _isUpdateAllowed = true;
+        }
         public void ClearPatients()
         {
             allowedRecipients.Clear();
@@ -30,6 +40,10 @@ namespace CGProToCCAddressHelper.Models
         public void Add (string recipient)
         {
             allowedRecipients.Add(recipient.Trim());
+        }
+        public void Update(List<string> recipients)
+        {
+            allowedRecipients = new HashSet<string>(recipients);
         }
 
         public bool isAddressNotAllowed(string recipient)

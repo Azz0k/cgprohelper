@@ -39,6 +39,7 @@ namespace CGProToCCAddressHelper.Services
         }
         private void ProcessMessage(string input)
         {
+            _allowedRecipients.DisableUpdates();
             string[] inputParts = input.Split();
             if (inputParts.Length == 0)
             {
@@ -66,43 +67,53 @@ namespace CGProToCCAddressHelper.Services
                     }
                     string fileName = inputParts[2];
                     var file = Path.Combine(_appSettings.baseDir, fileName.Trim());
-                    using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    using (BufferedStream bs = new BufferedStream(fs))
-                    using (StreamReader sr = new StreamReader(bs))
-                    {
-                        string pattern = @".*<(.*)>";
-                        string? line;
-                        while ((line = sr.ReadLine()) != null)
-                        {
-                            if (line.Trim() == "")
-                            {
-                                break;
-                            }
-                            if (line.StartsWith("R W "))
-                            {
-                                Match regexMatch = Regex.Match(line, pattern);
-                                if (regexMatch.Success)
-                                {
-                                    string recipient = regexMatch.Groups[1].Value;
-                                    string domain = recipient.Substring(recipient.IndexOf('@'));
-                                    if (_allowedRecipients.isAddressNotAllowed(recipient))
-                                    {
-                                        Print($"{lineNumberStr} ERROR \"You are not allowed to send this message\"");
-                                        Print($"* CGProToCCAddressHelper: message to {recipient} discarded.");
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-
-                    Print($"{lineNumberStr} OK");
+                    ParseFile(file, lineNumberStr);
                     break;
                 default:
                     break;
             }
+            _allowedRecipients.EnableUpdates();
+        }
+        private void ParseFile(string file, string lineNumberStr)
+        {
+            FileInfo fileInfo = new FileInfo(file);
+            if (!fileInfo.Exists) 
+            {
+                Print($"{lineNumberStr} OK");
+                Print($"* CGProToCCAddressHelper: unable to read file {file}");
+                return;
+            }
+            using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (BufferedStream bs = new BufferedStream(fs))
+            using (StreamReader sr = new StreamReader(bs))
+            {
+                string pattern = @".*<(.*)>";
+                string? line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (line.Trim() == "")
+                    {
+                        break;
+                    }
+                    if (line.StartsWith("R W "))
+                    {
+                        Match regexMatch = Regex.Match(line, pattern);
+                        if (regexMatch.Success)
+                        {
+                            string recipient = regexMatch.Groups[1].Value;
+                            string domain = recipient.Substring(recipient.IndexOf('@'));
+                            if (_allowedRecipients.isAddressNotAllowed(recipient))
+                            {
+                                Print($"{lineNumberStr} ERROR \"You are not allowed to send this message\"");
+                                Print($"* CGProToCCAddressHelper: message to {recipient} discarded.");
+                                return;
+                            }
+                        }
+                    }
+                }
 
+            }
+            Print($"{lineNumberStr} OK");
         }
     }
 }

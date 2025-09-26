@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace CGProToCCAddressHelper.Services
 {
@@ -13,38 +14,33 @@ namespace CGProToCCAddressHelper.Services
         private AllowedRecipients _allowedRecipients;
         private readonly AppSettings _appSettings;
         private string recipientsFile;
-        public UpdateService(AppSettings appSettings, AllowedRecipients allowedRecipients) 
+        private CancellationTokenSource updateSource = new CancellationTokenSource();
+        private FtpService _ftpService;
+        private FTPFile emailsFullListFile = new FTPFile();
+        public UpdateService(AppSettings appSettings, AllowedRecipients allowedRecipients, FtpService ftpService) 
         {
             _appSettings = appSettings;
             _allowedRecipients = allowedRecipients;
             string currentDir = _appSettings.currentDir;
             string fileName = _appSettings.emailsLocalFullFileName;
             recipientsFile = Path.Combine(currentDir, fileName);
+            _ftpService = ftpService;
         }
 
-        public async Task UpdateData()
+        public async Task UpdateDataFirstTime()
         {
-            await DownloadFullBaseAsync();
+            await _ftpService.DownloadFullBaseIfNeededAsync();
             ReadRecipientsFromFile();
+            updateSource = new CancellationTokenSource();
+            var backgroundTask = Task.Run(() => {BackGroundLoop(); }, updateSource.Token);
         }
-        private async Task DownloadFullBaseAsync()
+        private async Task BackGroundLoop()
         {
-            var connectionSettings = _appSettings.ConnectionSettings;
-            var token = new CancellationToken();
-            try
+            while (!updateSource.Token.IsCancellationRequested)
             {
-                using (var ftp = new AsyncFtpClient(connectionSettings.host, connectionSettings.login, connectionSettings.password))
-                {
-                    await ftp.Connect(token);
-                    await ftp.DownloadFile(recipientsFile, connectionSettings.emailsFullFileName, FtpLocalExists.Overwrite, FtpVerify.Retry, token: token);
-                }
+                await Task.Delay(1000*10, updateSource.Token);
+                await _ftpService.DownloadFullBaseIfNeededAsync();
             }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("* Unable to download file from ftp");
-                Console.Error.WriteLine(e.Message);
-            }
-            
         }
         private void ReadRecipientsFromFile()
         {
@@ -71,4 +67,5 @@ namespace CGProToCCAddressHelper.Services
             }
         }
     }
+
 }

@@ -25,12 +25,13 @@ namespace CGProToCCAddressHelper
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<AllowedRecipients>()
                 .AddSingleton<AppSettings>(appSettings)
+                .AddSingleton<FtpService>()
                 .AddSingleton<UpdateService>()
                 .AddSingleton<WorkerService>()
                 .BuildServiceProvider();
             var updateService = serviceProvider.GetRequiredService<UpdateService>();
             var workerService = serviceProvider.GetRequiredService<WorkerService>();
-            await updateService.UpdateData();
+            await updateService.UpdateDataFirstTime();
             workerService.Print("* ToCCAddressHelper Free");
             await workerService.Work();
         }

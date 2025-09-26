@@ -91,10 +91,6 @@ namespace CGProToCCAddressHelper.Services
                 string? line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    if (line.Trim() == "")
-                    {
-                        break;
-                    }
                     if (line.StartsWith("R W "))
                     {
                         Match regexMatch = Regex.Match(line, pattern);

@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace CGProToCCAddressHelper.Models
 {
-    internal class FTPFile
+    internal class MonitoredFile
     {
         public string fullName { get; set; } = string.Empty;
         public long size { get; set; } = 0;
-        public DateTime modifiedTime { get; set; } = DateTime.MinValue;
+        public DateTime monitoredTime { get; set; } = DateTime.MinValue;
     }
 }

@@ -29,7 +29,7 @@ namespace CGProToCCAddressHelper.Models
         {
             _isUpdateAllowed = true;
         }
-        public void ClearPatients()
+        public void ClearRecipients()
         {
             allowedRecipients.Clear();
         }
@@ -37,11 +37,7 @@ namespace CGProToCCAddressHelper.Models
         {
             allowedDomains = new HashSet<string>(domains);
         }
-        public void Add (string recipient)
-        {
-            allowedRecipients.Add(recipient.Trim());
-        }
-        public void Update(List<string> recipients)
+        public void UpdateRecipients(List<string> recipients)
         {
             allowedRecipients = new HashSet<string>(recipients);
         }

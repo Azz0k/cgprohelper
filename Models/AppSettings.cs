@@ -13,6 +13,7 @@ namespace CGProToCCAddressHelper.Models
         public string currentDir { get; init; } //The directory for your own needs 
         public string[] allowedDomains { get; init; }
         public string emailsLocalFullFileName { get; init; }
+        public int updateIntervalInSeconds { get; init; }
     }
 
     public class AppConnectionSettings

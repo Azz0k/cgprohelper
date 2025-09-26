@@ -14,7 +14,7 @@ namespace CGProToCCAddressHelper.Services
         private readonly AppSettings _appSettings;
         private string recipientsFile;
         private CancellationToken updateSourceToken = new CancellationTokenSource().Token;
-        private FTPFile emailsFullListFile = new FTPFile();
+        private MonitoredFile emailsFullListFile = new MonitoredFile();
         private bool needUpdateEmailsFullListFile = false;
         
         
@@ -66,10 +66,10 @@ namespace CGProToCCAddressHelper.Services
                     {
                         var size = await ftp.GetFileSize(item.FullName);
                         var time = await ftp.GetModifiedTime(item.FullName);
-                        if (size!=emailsFullListFile.size && time != emailsFullListFile.modifiedTime)
+                        if (size!=emailsFullListFile.size || time != emailsFullListFile.monitoredTime)
                         {
                             emailsFullListFile.size = size;
-                            emailsFullListFile.modifiedTime = time;
+                            emailsFullListFile.monitoredTime = time;
                             needUpdateEmailsFullListFile = true;
                         }
                     }

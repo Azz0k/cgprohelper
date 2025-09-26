@@ -16,8 +16,9 @@ namespace CGProToCCAddressHelper.Services
         private string recipientsFile;
         private CancellationTokenSource updateSource = new CancellationTokenSource();
         private FtpService _ftpService;
-        private FTPFile emailsFullListFile = new FTPFile();
-        public UpdateService(AppSettings appSettings, AllowedRecipients allowedRecipients, FtpService ftpService) 
+        private MonitoredFile emailsFullListFile = new MonitoredFile();
+        private int updateInterval = 60;
+        public UpdateService(AppSettings appSettings, AllowedRecipients allowedRecipients, FtpService ftpService)
         {
             _appSettings = appSettings;
             _allowedRecipients = allowedRecipients;
@@ -25,6 +26,11 @@ namespace CGProToCCAddressHelper.Services
             string fileName = _appSettings.emailsLocalFullFileName;
             recipientsFile = Path.Combine(currentDir, fileName);
             _ftpService = ftpService;
+            emailsFullListFile.fullName = Path.Combine(_appSettings.currentDir, _appSettings.emailsLocalFullFileName);
+            if (_appSettings.updateIntervalInSeconds > 0)
+            {
+                updateInterval = _appSettings.updateIntervalInSeconds;  
+            }
         }
 
         public async Task UpdateDataFirstTime()
@@ -32,19 +38,32 @@ namespace CGProToCCAddressHelper.Services
             await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
             ReadRecipientsFromFile();
             updateSource = new CancellationTokenSource();
-            var backgroundTask = Task.Run(() => {BackGroundLoop(); }, updateSource.Token);
+            var backgroundTask = Task.Run(() => { BackGroundLoop(); }, updateSource.Token);
         }
         private async Task BackGroundLoop()
         {
             while (!updateSource.Token.IsCancellationRequested)
             {
-                await Task.Delay(1000*10, updateSource.Token);
+                await Task.Delay(1000 * updateInterval, updateSource.Token);
                 await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
+                if (isThereDifferentFullEmailsFileLocal() && _allowedRecipients.isUpdateAllowed)
+                {
+                    ReadRecipientsFromFile();
+                }
             }
+        }
+        private bool isThereDifferentFullEmailsFileLocal()
+        {
+            FileInfo fileInfo = new FileInfo(emailsFullListFile.fullName);
+            if (!fileInfo.Exists)
+            {
+                WriteErrorAndExit("");
+            }
+            return fileInfo.Length != emailsFullListFile.size || fileInfo.CreationTime!= emailsFullListFile.monitoredTime;
         }
         private void ReadRecipientsFromFile()
         {
-            _allowedRecipients.ClearPatients();
+            List<string> addresses = new List<string>();
             try
             {
                 using (FileStream fs = File.Open(recipientsFile, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -54,17 +73,24 @@ namespace CGProToCCAddressHelper.Services
                     string? line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        _allowedRecipients.Add(line);
+                        addresses.Add(line.Trim());
                     }
-
                 }
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine("* Error: The address files not found");
-                Console.Error.WriteLine(e.Message);
-                Environment.Exit(1);
+                WriteErrorAndExit(e.Message);
             }
+            _allowedRecipients.ClearRecipients();
+            _allowedRecipients.UpdateRecipients(addresses);
+        }
+        private void WriteErrorAndExit(string message)
+        {
+            updateSource.Cancel();
+            Console.Error.WriteLine("* Error: The address files not found");
+            if (message != "") 
+                Console.Error.WriteLine($"* {message}");
+            Environment.Exit(1);
         }
     }
 

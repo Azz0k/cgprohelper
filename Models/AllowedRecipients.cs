@@ -18,7 +18,7 @@ namespace CGProToCCAddressHelper.Models
         public AllowedRecipients(AppSettings appSettings)
         {
             _appSettings = appSettings;
-            allowedDomains = new HashSet<string>(appSettings.allowedDomains);
+            allowedDomains = new HashSet<string>(appSettings.allowedDomains, StringComparer.OrdinalIgnoreCase);
         }
 
         public void DisableUpdates()
@@ -40,6 +40,7 @@ namespace CGProToCCAddressHelper.Models
 
         public bool isAddressNotAllowed(string recipient)
         {
+            recipient = recipient.Trim();
             string domain = recipient.Substring(recipient.IndexOf('@'));
             return !allowedDomains.Contains(domain) && !allowedRecipients.Contains(recipient);
         }

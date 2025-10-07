@@ -59,7 +59,7 @@ namespace CGProToCCAddressHelper.Services
 
         private void ReadRecipientsFromFile()
         {
-            HashSet<string> addresses = new HashSet<string>();
+            HashSet<string> addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             try
             {
                 using (FileStream fs = File.Open(recipientsFile, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -69,7 +69,7 @@ namespace CGProToCCAddressHelper.Services
                     string? line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        addresses.Add(line.Trim().ToLower());
+                        addresses.Add(line.Trim());
                     }
                 }
             }

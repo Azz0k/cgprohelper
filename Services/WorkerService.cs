@@ -97,7 +97,7 @@ namespace CGProToCCAddressHelper.Services
                         if (regexMatch.Success)
                         {
                             string recipient = regexMatch.Groups[1].Value;
-                            if (_allowedRecipients.isAddressNotAllowed(recipient.ToLower()))
+                            if (_allowedRecipients.isAddressNotAllowed(recipient))
                             {
                                 Print($"{lineNumberStr} ERROR \"You are not allowed to send this message\"");
                                 Print($"* CGProToCCAddressHelper: message to {recipient} discarded.");

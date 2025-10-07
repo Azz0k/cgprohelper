@@ -69,7 +69,7 @@ namespace CGProToCCAddressHelper.Services
                     string? line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        addresses.Add(line.Trim());
+                        addresses.Add(line.Trim().ToLower());
                     }
                 }
             }

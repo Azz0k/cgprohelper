@@ -33,8 +33,14 @@ namespace CGProToCCAddressHelper.Services
 
         public async Task UpdateDataFirstTime()
         {
-            await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
-            ReadRecipientsFromFile();
+            try
+            {
+                _allowedRecipients.UpdateRecipients(await _ftpService.DownloadFullFileAsync());
+            }
+            catch (Exception ex)
+            {
+                WriteErrorAndExit(ex.Message);
+            }
             updateSource = new CancellationTokenSource();
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             var backgroundTask = Task.Run(() => { BackGroundLoop(); }, updateSource.Token);
@@ -46,40 +52,22 @@ namespace CGProToCCAddressHelper.Services
             while (!updateSource.Token.IsCancellationRequested)
             {
                 await Task.Delay(1000 * updateInterval, updateSource.Token);
-                bool needUpdateEmailsFullListFile = await _ftpService.DownloadFullBaseIfNeededAsync(updateSource.Token);
+                bool needUpdateEmailsFullListFile = await _ftpService.DownloadIfNeededAsync(updateSource.Token);
                 if (needUpdateEmailsFullListFile)
                 {
                     while (!_allowedRecipients.isUpdateAllowed || updateSource.Token.IsCancellationRequested)
                     {
                     }
-                    ReadRecipientsFromFile();
+                    _allowedRecipients.UpdateRecipients(await _ftpService.DownloadFullFileAsync());
                 }
             }
         }
 
-        private void ReadRecipientsFromFile()
+        private void GetFromFTP()
         {
-            HashSet<string> addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            try
-            {
-                using (FileStream fs = File.Open(recipientsFile, FileMode.Open, FileAccess.Read, FileShare.Read))
-                using (BufferedStream bs = new BufferedStream(fs))
-                using (StreamReader sr = new StreamReader(bs))
-                {
-                    string? line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        addresses.Add(line.Trim());
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                WriteErrorAndExit(e.Message);
-            }
-            _allowedRecipients.UpdateRecipients(addresses);
+
         }
-        private void WriteErrorAndExit(string message)
+        private void WriteErrorAndExit(string message="")
         {
             updateSource.Cancel();
             Console.Error.WriteLine("* Error: The address files not found");

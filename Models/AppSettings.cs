@@ -23,5 +23,8 @@ namespace CGProToCCAddressHelper.Models
 
         public required string password { get; init; }
         public required string emailsFullFileName { get; init; }
+        public required string emailsDiffFileName { get; init; }
+        public required string domainsFullFileName { get; init; }
+        public required string domainsDiffFileName { get; init; }
     }
 }

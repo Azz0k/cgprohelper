@@ -70,7 +70,10 @@ namespace CGProToCCAddressHelper.Services
                         _allowedRecipients.UpdateRecipients(update.Data); break;
                     case FileTypes.EmailsDiff:
                         _allowedRecipients.AddRecipients(update.Data); break;
-                    default:break;
+                    case FileTypes.DomainsFull:
+                    case FileTypes.DomainsDiff:
+                        _allowedRecipients.AddDomains(update.Data); break;  
+                        default:break;
                 }
             }
         }

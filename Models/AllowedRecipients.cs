@@ -29,9 +29,9 @@ namespace CGProToCCAddressHelper.Models
         {
             _isUpdateAllowed = true;
         }
-        public void UpdateDomains(string[] domains)
+        public void AddDomains(HashSet<string> domains)
         {
-            allowedDomains = new HashSet<string>(domains);
+            allowedDomains.UnionWith(domains);
         }
         public void UpdateRecipients(HashSet<string> recipients)
         {
@@ -44,7 +44,7 @@ namespace CGProToCCAddressHelper.Models
         public bool isAddressNotAllowed(string recipient)
         {
             recipient = recipient.Trim();
-            string domain = recipient.Substring(recipient.IndexOf('@'));
+            string domain = recipient.Substring(recipient.IndexOf('@')+1);
             return !allowedDomains.Contains(domain) && !allowedRecipients.Contains(recipient);
         }
     }

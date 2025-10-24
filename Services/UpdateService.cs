@@ -35,7 +35,7 @@ namespace CGProToCCAddressHelper.Services
         {
             try
             {
-                _allowedRecipients.UpdateRecipients(await _ftpService.DownloadFullFileAsync());
+                await GetDataFromFTP();
             }
             catch (Exception ex)
             {
@@ -52,20 +52,27 @@ namespace CGProToCCAddressHelper.Services
             while (!updateSource.Token.IsCancellationRequested)
             {
                 await Task.Delay(1000 * updateInterval, updateSource.Token);
-                bool needUpdateEmailsFullListFile = await _ftpService.DownloadIfNeededAsync(updateSource.Token);
-                if (needUpdateEmailsFullListFile)
+                while (!_allowedRecipients.isUpdateAllowed || updateSource.Token.IsCancellationRequested)
                 {
-                    while (!_allowedRecipients.isUpdateAllowed || updateSource.Token.IsCancellationRequested)
-                    {
-                    }
-                    _allowedRecipients.UpdateRecipients(await _ftpService.DownloadFullFileAsync());
                 }
+                await GetDataFromFTP();
             }
         }
 
-        private void GetFromFTP()
+        private async Task GetDataFromFTP()
         {
-
+            List<UpdatesFromFile> updates = await _ftpService.DownloadIfNeededAsync(updateSource.Token);
+            foreach (UpdatesFromFile update in updates)
+            {
+                switch (update.FileType)
+                {
+                    case FileTypes.EmailsFull:
+                        _allowedRecipients.UpdateRecipients(update.Data); break;
+                    case FileTypes.EmailsDiff:
+                        _allowedRecipients.AddRecipients(update.Data); break;
+                    default:break;
+                }
+            }
         }
         private void WriteErrorAndExit(string message="")
         {

@@ -57,9 +57,9 @@ namespace CGProToCCAddressHelper.Services
             }
         }
 
-        private async Task CheckIsThereDifferentFilesOnFTP()
+        private async Task<bool> CheckIsThereDifferentFilesOnFTP()
         {
-
+            bool result = false;
             await ExecuteAsync(async (ftp) =>
             {
                 var items = await ftp.GetListing("/");
@@ -74,11 +74,12 @@ namespace CGProToCCAddressHelper.Services
                             monitoredFiles[item.FullName].Size = size;
                             monitoredFiles[item.FullName].ModifiedTime = time;
                             monitoredFiles[item.FullName].IsChanged = true;
+                            result = true;
                         }
                     }
                 }
             });
-            
+            return result;
         }
         private async Task<HashSet<string>> DownloadFileFromFTPAsync(string fileName)
         {

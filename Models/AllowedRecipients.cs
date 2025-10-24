@@ -37,7 +37,10 @@ namespace CGProToCCAddressHelper.Models
         {
             allowedRecipients = recipients;
         }
-
+        public void AddRecipients(HashSet<string> recipients)
+        {
+            allowedRecipients.UnionWith(recipients);
+        }
         public bool isAddressNotAllowed(string recipient)
         {
             recipient = recipient.Trim();

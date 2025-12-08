@@ -14,6 +14,9 @@ namespace CGProToCCAddressHelper.Models
         public required string[] allowedDomains { get; init; }
         public required string emailsLocalFullFileName { get; init; }
         public required int updateIntervalInSeconds { get; init; }
+        public required string monitoredSendersFileName { get; init; }
+        public required string relplyAllowedSendersFileName { get; init; }  
+        public required string replyAllowedRecipientsFileName { get; init; }
     }
 
     public class AppConnectionSettings

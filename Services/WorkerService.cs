@@ -5,16 +5,17 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static CGProToCCAddressHelper.Utils.Utils;
 
 namespace CGProToCCAddressHelper.Services
 {
     internal class WorkerService
     {
-        private AllowedRecipients _allowedRecipients;
+        private EmailChecker _emailChecker;
         private readonly AppSettings _appSettings;
-        public WorkerService(AppSettings appSettings, AllowedRecipients allowedRecipients) 
+        public WorkerService(AppSettings appSettings, EmailChecker emailChecker) 
         {
-            _allowedRecipients = allowedRecipients;
+            _emailChecker = emailChecker;
             _appSettings = appSettings;
         }
         public async Task Work()
@@ -32,6 +33,14 @@ namespace CGProToCCAddressHelper.Services
                 });
             }
         }
+        public void PrintGoodMessage(string lineNumber)
+        {
+            Print($"{lineNumber} OK");
+        }
+        public void PrintBadMessage(string lineNumber)
+        {
+            Print($"{lineNumber} ERROR \"You are not allowed to send this message\"");
+        }
         public void Print(string message)
         {
             Console.WriteLine(message);
@@ -39,7 +48,7 @@ namespace CGProToCCAddressHelper.Services
         }
         private void ProcessMessage(string input)
         {
-            _allowedRecipients.DisableUpdates();
+            _emailChecker.DisableUpdates();
             string[] inputParts = input.Split();
             if (inputParts.Length == 0)
             {
@@ -72,43 +81,74 @@ namespace CGProToCCAddressHelper.Services
                 default:
                     break;
             }
-            _allowedRecipients.EnableUpdates();
+            _emailChecker.EnableUpdates();
+        }
+        public bool EnsureFileExists(string file, string lineNumberStr)
+        {
+            FileInfo fileInfo = new(file);
+            if (!fileInfo.Exists)
+            {
+                PrintGoodMessage(lineNumberStr);
+                PrintLogMessage($"{file} file does not exists");
+                return false;
+            }
+            return true;
         }
         private void ParseFile(string file, string lineNumberStr)
         {
-            FileInfo fileInfo = new FileInfo(file);
-            if (!fileInfo.Exists) 
+            if (!EnsureFileExists(file, lineNumberStr)) return;
+            try
             {
-                Print($"{lineNumberStr} OK");
-                Print($"* CGProToCCAddressHelper: unable to read file {file}");
-                return;
-            }
-            using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (BufferedStream bs = new BufferedStream(fs))
-            using (StreamReader sr = new StreamReader(bs))
-            {
-                string pattern = @".*<(.*)>";
-                string? line;
-                while ((line = sr.ReadLine()) != null)
+                using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (BufferedStream bs = new BufferedStream(fs))
+                using (StreamReader sr = new StreamReader(bs))
                 {
-                    if (line.StartsWith("R W "))
+                    string? line;
+                    bool isSenderReplyAllowed = false;
+                    string thisEmailSender = "";
+                    while ((line = sr.ReadLine()) != null)
                     {
-                        Match regexMatch = Regex.Match(line, pattern);
-                        if (regexMatch.Success)
+                        if (line == "") break;
+                        string? sender = GetSender(line);
+                        if (sender != null)
                         {
-                            string recipient = regexMatch.Groups[1].Value;
-                            if (_allowedRecipients.isAddressNotAllowed(recipient))
+                            thisEmailSender = sender;
+                            isSenderReplyAllowed = _emailChecker.isSenderReplyAllowed(sender);
+                            /*
+                            if (!_emailChecker.isAdressMonitored(sender))
                             {
-                                Print($"{lineNumberStr} ERROR \"You are not allowed to send this message\"");
-                                Print($"* CGProToCCAddressHelper: message to {recipient} discarded.");
+                                PrintGoodMessage(lineNumberStr);
                                 return;
+                            }
+                            */
+                        }
+                        string? recipient = GetRecipient(line);
+                        if (recipient != null) 
+                        {
+                            if (_emailChecker.isSenderReplyAllowed(recipient))
+                            {
+                                _emailChecker.AddReplyAllowedRecipient(thisEmailSender);
+                            }
+                            if (_emailChecker.isAdressMonitored(thisEmailSender) && _emailChecker.isAddressNotAllowed(recipient))
+                            {
+                                if (!isSenderReplyAllowed || !_emailChecker.isRecipientReplyAllowed(recipient))
+                                {
+                                    PrintBadMessage(lineNumberStr);
+                                    PrintLogMessage($"message to {recipient} discarded.");
+                                    return;
+                                }
                             }
                         }
                     }
                 }
-
             }
-            Print($"{lineNumberStr} OK");
+            catch (Exception e)
+            {
+                PrintLogMessage($"cannot process message {file}");
+                PrintLogMessage($"{e.Message}");
+            }
+            PrintGoodMessage(lineNumberStr);
+
         }
     }
 }

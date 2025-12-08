@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using CGProToCCAddressHelper.Services;
 using CGProToCCAddressHelper.Models;
+using CGProToCCAddressHelper.Utils;
 
 namespace CGProToCCAddressHelper
 {
@@ -22,12 +23,14 @@ namespace CGProToCCAddressHelper
                 Console.Error.WriteLine("* Unable to read appsettings file.");
                 return;
             }
+            FTP.GetInstance(appSettings);
             var serviceProvider = new ServiceCollection()
-                .AddSingleton<AllowedRecipients>()
+                .AddSingleton<EmailChecker>()
                 .AddSingleton<AppSettings>(appSettings)
-                .AddSingleton<FtpService>()
+                .AddSingleton<MonitoredFiles>()
                 .AddSingleton<UpdateService>()
                 .AddSingleton<WorkerService>()
+                .AddSingleton<FileDataStore>()
                 .BuildServiceProvider();
             var updateService = serviceProvider.GetRequiredService<UpdateService>();
             var workerService = serviceProvider.GetRequiredService<WorkerService>();

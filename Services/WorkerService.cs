@@ -114,13 +114,6 @@ namespace CGProToCCAddressHelper.Services
                         {
                             thisEmailSender = sender;
                             isSenderReplyAllowed = _emailChecker.isSenderReplyAllowed(sender);
-                            /*
-                            if (!_emailChecker.isAdressMonitored(sender))
-                            {
-                                PrintGoodMessage(lineNumberStr);
-                                return;
-                            }
-                            */
                         }
                         string? recipient = GetRecipient(line);
                         if (recipient != null) 

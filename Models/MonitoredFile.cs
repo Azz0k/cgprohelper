@@ -46,11 +46,6 @@ namespace CGProToCCAddressHelper.Models
             return modifiedTime.CompareTo(obj);
         }
     }
-    internal class UpdatesFromFile
-    {
-        public required FileTypes FileType;
-        public required HashSet<string> Data { get; set; }
-    }
 
     internal class MonitoredFileOnDisk : MonitoredFile, ICheckUpdate
     {
@@ -179,7 +174,7 @@ namespace CGProToCCAddressHelper.Models
             connection.Open();
             SqliteCommand command = new();
             command.Connection = connection;
-            command.CommandText = $"SELECT * FROM AllowedEmails WHERE date<\"{deadLine}\";";
+            command.CommandText = $"SELECT * FROM AllowedEmails WHERE LastReplyDate<\"{deadLine}\";";
             HashSet<string> lines = new(StringComparer.OrdinalIgnoreCase);
             using SqliteDataReader reader = command.ExecuteReader();
             if (reader.HasRows)
@@ -237,7 +232,7 @@ namespace CGProToCCAddressHelper.Models
             _files.Add(FileTypes.EmailsDiff, new MonitoredFileOnFTP(appsettings.ConnectionSettings.emailsDiffFileName, FileTypes.EmailsDiff));
             _files.Add(FileTypes.DomainsFull, new MonitoredFileOnFTP(appsettings.ConnectionSettings.domainsFullFileName, FileTypes.DomainsFull));
             _files.Add(FileTypes.DomainsDiff, new MonitoredFileOnFTP(appsettings.ConnectionSettings.domainsDiffFileName, FileTypes.DomainsDiff));
-            _files.Add(FileTypes.relplyAllowedSenders, new MonitoredFileOnDisk(PathCombine(appsettings.relplyAllowedSendersFileName), FileTypes.relplyAllowedSenders));
+            _files.Add(FileTypes.relplyAllowedSenders, new MonitoredFileOnDisk(PathCombine(appsettings.replyAllowedSendersFileName), FileTypes.relplyAllowedSenders));
             _files.Add(FileTypes.replyAllowedRecipients, new MonitoredSQLite(PathCombine(appSettings.replyAllowedRecipientsFileName), FileTypes.replyAllowedRecipients));
             _files.Add(FileTypes.monitoredSenders, new MonitoredFileOnDisk(PathCombine(appSettings.monitoredSendersFileName), FileTypes.monitoredSenders));
         }

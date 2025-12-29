@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../GateKeeper.Core/GateKeeper.Core.csproj" />
+  <Project Path="GateKeeper.API.csproj" />
+</Solution>

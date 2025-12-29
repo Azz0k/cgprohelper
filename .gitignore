@@ -14,6 +14,9 @@
 *.userprefs
 *.db
 *.txt
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 
 # Mono auto generated files
 mono_crash.*

@@ -1,6 +1,7 @@
 using GateKeeper.Core.Application;
 using GateKeeper.Core.Context;
 using GateKeeper.Core.Services;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 
@@ -17,12 +18,15 @@ namespace GateKeeper.API
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
-            builder.Services.AddSingleton<AddressesDbContext>();
-            builder.Services.AddSingleton<DatabaseService>();
-            builder.Services.AddSingleton<DomainApplication>();
+            builder.Services.AddScoped<DatabaseService>();
+            builder.Services.AddDbContext<AddressesDbContext>();
+            builder.Services.AddScoped<DomainApplication>();
 
             var app = builder.Build();
-            var dbService = app.Services.GetRequiredService<DatabaseService>();
+            //var dbService = app.Services.GetRequiredService<DatabaseService>();
+            //await dbService.InitDatabaseAsync();
+            using var scope = app.Services.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<DatabaseService>();
             await dbService.InitDatabaseAsync();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

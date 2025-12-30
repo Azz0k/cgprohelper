@@ -11,14 +11,20 @@ namespace GateKeeper.Core.Context
         public DbSet<ForeingAddresses> foreingAddresses { get; set; }
         public DbSet<LocalMonitoredAddresses> localMonitoredAddresses { get; set; }
         public DbSet<AllowedDomains> allowedDomains { get; set; }
-        private string fileName;
+        private string fileName = "AddressDatabase.sqlite";
         public AddressesDbContext()
         {
-            this.fileName = "AddressDatabase.sqlite";
+        }
+        public AddressesDbContext(DbContextOptions<AddressesDbContext> options)
+        : base(options)
+        {
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite($"Data Source={fileName}");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite($"Data Source={fileName}");
+            }
             base.OnConfiguring(optionsBuilder);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

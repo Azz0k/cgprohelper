@@ -1,4 +1,4 @@
-﻿using GateKeeper.Core.Models;
+﻿using GateKeeper.Core.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,19 +26,22 @@ namespace GateKeeper.Core.Context
             modelBuilder.Entity<ForeingAddresses>(entity =>
             {
                 entity.ToTable("ForeingAddresses");
-                entity.HasKey(e => e.Email);
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Email).IsUnique();
                 entity.Property(e => e.ReceivedDate).IsRequired();
             });
             modelBuilder.Entity<LocalMonitoredAddresses>(entity =>
             {
                 entity.ToTable("localMonitoredAddresses");
-                entity.HasKey(e => e.Email);
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Email).IsUnique();
                 entity.Property(e => e.IsReplyAllowed).IsRequired().HasDefaultValue(false);
             });
             modelBuilder.Entity<AllowedDomains>(entity => 
             {
                 entity.ToTable($"{nameof(AllowedDomains)}");
-                entity.HasKey(e => e.Domain);
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Domain).IsUnique();
             });
             base.OnModelCreating(modelBuilder);
         }

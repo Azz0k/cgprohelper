@@ -30,9 +30,9 @@ namespace GateKeeper.Core.Application
             }
         }
 
-        public Task DeleteAsync<T>(T entity) where T : class
+        public async Task DeleteAsync<T>(int id) where T : class
         {
-            throw new NotImplementedException();
+            await dbservice.DeleteAsync<T>(id);
         }
 
         public async Task<List<T>> GetAllRecordsAsync<T>() where T : class

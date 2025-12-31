@@ -45,8 +45,9 @@ namespace GateKeeper.API.Controllers
         }
         // DELETE api/<APIController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
+            await app.DeleteAsync<AllowedDomains>(id);
         }
     }
 }

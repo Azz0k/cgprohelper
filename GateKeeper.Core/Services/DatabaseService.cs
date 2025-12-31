@@ -31,17 +31,16 @@ namespace GateKeeper.Core.Services
             await _db.Set<T>().AddAsync(entity);
             await _db.SaveChangesAsync();
         }
-        public Task<T> Read<T>(string key)
-        {
-            throw new NotImplementedException();
-        }
         public Task Update<T>(T entity)
         {
             throw new NotImplementedException();
         }
-        public Task<T> Delete<T>(string key)
+        public async Task DeleteAsync<T>(int id) where T : class
         {
-            throw new NotImplementedException();
+            var result = await _db.Set<T>().FindAsync(id);
+            if (result == null) return;
+            _db.Set<T>().Remove(result);
+            await _db.SaveChangesAsync();
         }
 
         public async Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class

@@ -78,8 +78,7 @@ namespace GateKeeper.Tests
             });
             
         }
-        [Fact]
-        public async Task Get_ShouldReturnData()
+        private async Task DoMigrateAsync()
         {
             using (var scope = _factory.Services.CreateScope())
             {
@@ -87,14 +86,24 @@ namespace GateKeeper.Tests
                 var db = scopedServices.GetRequiredService<AddressesDbContext>();
                 await db.Database.MigrateAsync();
             }
+        }
+        [Fact]
+        public async Task DomainApi_Get_ShouldReturnDataAfterCertainTranformations()
+        {
+            string apiUri = "/api/domain";
+            await DoMigrateAsync();
             List<string> domains = ["test.test","text.text"];
-            var json = new AddDomainRequest() { Domain = domains};
-            var res = await _client.PostAsJsonAsync("/api/domain", json);
-            // act
-            var response = await _client.GetAsync("/api/domain");
+            var addJson = new AddDomainRequest() { Domain = domains};
+            var res = await _client.PostAsJsonAsync(apiUri, addJson);
+            var response = await _client.GetAsync(apiUri);
             var content = await response.Content.ReadAsStringAsync();
             Assert.Contains("[{\"id\":1,\"domain\":\"test.test\"},{\"id\":2,\"domain\":\"text.text\"}]",  content);
+            res = await _client.DeleteAsync($"{apiUri}/1");
+            response = await _client.GetAsync(apiUri);
+            content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("[{\"id\":2,\"domain\":\"text.text\"}]", content);
         }
+
 
     }
 }

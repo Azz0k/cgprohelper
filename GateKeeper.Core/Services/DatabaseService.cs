@@ -1,5 +1,6 @@
 ﻿using GateKeeper.Core.Context;
 using GateKeeper.Core.Interfaces;
+using GateKeeper.Core.Models.ApiModels;
 using GateKeeper.Core.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,18 +32,22 @@ namespace GateKeeper.Core.Services
             await _db.Set<T>().AddAsync(entity);
             await _db.SaveChangesAsync();
         }
-        public Task Update<T>(T entity)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task DeleteAsync<T>(int id) where T : class
+        public async Task<bool> UpdateAsync<T>(int id, Action<T> updateAction) where T : class
         {
             var result = await _db.Set<T>().FindAsync(id);
-            if (result == null) return;
+            if (result == null) return false;
+            updateAction(result);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> DeleteAsync<T>(int id) where T : class
+        {
+            var result = await _db.Set<T>().FindAsync(id);
+            if (result == null) return false;
             _db.Set<T>().Remove(result);
             await _db.SaveChangesAsync();
+            return true;
         }
-
         public async Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
             return await _db.Set<T>().AnyAsync(predicate);

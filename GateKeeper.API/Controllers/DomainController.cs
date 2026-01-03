@@ -27,14 +27,20 @@ namespace GateKeeper.API.Controllers
         {
             return await app.GetAllRecordsAsync<AllowedDomains>();
         }
+        // PUT api/<APIController>
+        [HttpPut]
+        public async Task<StatusCodeResult> Put([FromBody] UpdateDomainRequest value)
+        {
+            int code = await app.UpdateAsync(value);
+            return StatusCode(code);
+        }
 
-      
 
         // POST api/<APIController>
         [HttpPost]
-        public async Task Post([FromBody] AddDomainRequest value)
+        public async Task<Dictionary<int, HashSet<string>>> Post([FromBody] AddDomainRequest value)
         {
-            await app.AddAsync<AllowedDomains>(value);
+            return await app.AddAsync(value);
         }
 
         // GET api/<APIController>/5
@@ -45,9 +51,10 @@ namespace GateKeeper.API.Controllers
         }
         // DELETE api/<APIController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<StatusCodeResult> Delete(int id)
         {
-            await app.DeleteAsync<AllowedDomains>(id);
+            int code = await app.DeleteAsync<AllowedDomains>(id);
+            return StatusCode(code);
         }
     }
 }

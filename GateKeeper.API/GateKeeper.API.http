@@ -1,11 +1,11 @@
 @GateKeeper.API_HostAddress = http://localhost:5102
 
-GET {{GateKeeper.API_HostAddress}}/weatherforecast/
+GET {{GateKeeper.API_HostAddress}}/api/domain/
 Accept: application/json
 
 ###
 
-GET {{GateKeeper.API_HostAddress}}/api/domain/
+POST {{GateKeeper.API_HostAddress}}/api/domain/
 Accept: application/json
 
 ###

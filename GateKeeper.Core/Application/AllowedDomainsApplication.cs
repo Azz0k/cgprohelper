@@ -12,10 +12,10 @@ using static GateKeeper.Core.Utils.Utils;
 
 namespace GateKeeper.Core.Application
 {
-    public class DomainApplication: ApplicationBase
+    public class AllowedDomainsApplication: ApplicationBase
     {
         private IDataBaseService dbservice;
-        public DomainApplication(DatabaseService dbservice):base(dbservice)
+        public AllowedDomainsApplication(DatabaseService dbservice):base(dbservice)
         { 
             this.dbservice = dbservice;
         }

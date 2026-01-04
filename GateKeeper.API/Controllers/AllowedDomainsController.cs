@@ -14,10 +14,10 @@ namespace GateKeeper.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DomainController : ControllerBase
+    public class AllowedDomainsController : ControllerBase
     {
-        private DomainApplication app { get; set; }
-        public DomainController(DomainApplication app)
+        private AllowedDomainsApplication app { get; set; }
+        public AllowedDomainsController(AllowedDomainsApplication app)
         {
             this.app = app;
         }

@@ -20,7 +20,7 @@ namespace GateKeeper.API
             builder.Services.AddOpenApi();
             builder.Services.AddScoped<DatabaseService>();
             builder.Services.AddDbContext<AddressesDbContext>();
-            builder.Services.AddScoped<DomainApplication>();
+            builder.Services.AddScoped<AllowedDomainsApplication>();
 
             var app = builder.Build();
             //var dbService = app.Services.GetRequiredService<DatabaseService>();

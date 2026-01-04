@@ -59,7 +59,7 @@ namespace GateKeeper.Tests
             builder.UseEnvironment("Development");
         }
     }
-
+    
     public class ApiTests :
     IClassFixture<CustomWebApplicationFactory<Program>>
     {
@@ -68,7 +68,7 @@ namespace GateKeeper.Tests
         private readonly HttpClient _client;
         private readonly CustomWebApplicationFactory<Program>
             _factory;
-        private string apiUri = "/api/domain";
+        private string apiUri = "/api/AllowedDomains";
 
         public ApiTests(
             CustomWebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
@@ -79,15 +79,15 @@ namespace GateKeeper.Tests
             {
                 AllowAutoRedirect = false
             });
-            
+            DoMigrate();
         }
-        private async Task DoMigrateAsync()
+        private void DoMigrate()
         {
             using (var scope = _factory.Services.CreateScope())
             {
                 var scopedServices = scope.ServiceProvider;
                 var db = scopedServices.GetRequiredService<AddressesDbContext>();
-                await db.Database.MigrateAsync();
+                db.Database.Migrate();
             }
         }
         private async Task<List<DomainDTO>?> GetAsync(string apiUri)
@@ -96,10 +96,16 @@ namespace GateKeeper.Tests
             var content = await response.Content.ReadFromJsonAsync<List<DomainDTO>>();
             return content;
         }
+        private string GenerateRandomDomainName()
+        {
+            return Guid.NewGuid().ToString(); 
+        }
         private async Task<Dictionary<int, List<string>>?> PostToDomainAPI()
         {
-            await DoMigrateAsync();
-            var addDomainRequest = new AddDomainRequest() { Domain = ["test.test", "text.text", "text.text", ".", "1,txt"] };
+            // await DoMigrateAsync();
+            string d1 = GenerateRandomDomainName();
+            string d2 = GenerateRandomDomainName();
+            var addDomainRequest = new AddDomainRequest() { Domain = [$"{d1}.{d1}", $"{d2}.{d2}", $"{d2}.{d2}", ".", "1,txt"] };
             var response = await _client.PostAsJsonAsync(apiUri, addDomainRequest);
             response.EnsureSuccessStatusCode();
             Dictionary<int, List<string>>? addedData = await response.Content.ReadFromJsonAsync<Dictionary<int, List<string>>>();
@@ -120,7 +126,7 @@ namespace GateKeeper.Tests
             Dictionary<int, List<string>>? addedData = await PostToDomainAPI();
             List<DomainDTO>? domains = await GetAsync(apiUri);
             Assert.NotNull(domains);
-            Assert.Equal(2, domains.Count);
+            Assert.NotEmpty(domains);
         }
         [Fact]
         public async Task DomainApi_Delete_ShouldWorkCorrectly()

@@ -10,7 +10,7 @@ namespace GateKeeper.Core.Utils
         public static bool isDomainPatternValid(string? domain) 
         {
             if (domain == null) return false;
-            string pattern = @"^(([a-z0-9]+)|\*)(\.(([a-z0-9]+)|\*))*$";
+            string pattern = @"^(([a-z0-9\-]+)|\*)(\.(([a-z0-9\-]+)|\*))*$";
             var match = Regex.Match(domain, pattern,RegexOptions.IgnoreCase);
             return match.Success;
         }

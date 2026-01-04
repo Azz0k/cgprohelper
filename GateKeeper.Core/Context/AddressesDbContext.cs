@@ -8,8 +8,8 @@ namespace GateKeeper.Core.Context
 {
     public class AddressesDbContext : DbContext
     {
-        public DbSet<ForeingAddresses> foreingAddresses { get; set; }
-        public DbSet<LocalMonitoredAddresses> localMonitoredAddresses { get; set; }
+        public DbSet<ForeingEmails> foreingAddresses { get; set; }
+        public DbSet<LocalMonitoredEmails> localMonitoredAddresses { get; set; }
         public DbSet<AllowedDomains> allowedDomains { get; set; }
         private string fileName = "AddressDatabase.sqlite";
         public AddressesDbContext()
@@ -29,14 +29,14 @@ namespace GateKeeper.Core.Context
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ForeingAddresses>(entity =>
+            modelBuilder.Entity<ForeingEmails>(entity =>
             {
                 entity.ToTable("ForeingAddresses");
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Email).IsUnique();
                 entity.Property(e => e.ReceivedDate).IsRequired();
             });
-            modelBuilder.Entity<LocalMonitoredAddresses>(entity =>
+            modelBuilder.Entity<LocalMonitoredEmails>(entity =>
             {
                 entity.ToTable("localMonitoredAddresses");
                 entity.HasKey(e => e.Id);

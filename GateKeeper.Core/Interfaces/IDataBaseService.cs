@@ -11,8 +11,8 @@ namespace GateKeeper.Core.Interfaces
     public interface IDataBaseService
     {
         Task InitDatabaseAsync();
-        Task CreateAsync<T> (T entity) where T :class;
-        Task<bool> ExistsAsync<T> (Expression<Func<T, bool>> predicate) where T : class;
+        Task<T> CreateAsync<T> (T entity) where T :class;
+        Task<T?> FindAsync<T> (Expression<Func<T, bool>> predicate) where T : class;
         Task<List<T>> ReadAllAsync<T>() where T : class;
         Task<bool> UpdateAsync<T>(int id, Action<T> updateAction) where T : class;
         Task<bool> DeleteAsync<T>(int id) where T : class;

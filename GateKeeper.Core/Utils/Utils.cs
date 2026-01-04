@@ -14,5 +14,9 @@ namespace GateKeeper.Core.Utils
             var match = Regex.Match(domain, pattern,RegexOptions.IgnoreCase);
             return match.Success;
         }
+        public static string GenerateReceivedDate()
+        {
+            return DateTime.Now.ToString("yyyy-MM-dd");
+        }
     }
 }

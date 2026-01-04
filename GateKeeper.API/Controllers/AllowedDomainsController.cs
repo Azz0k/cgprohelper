@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage;
-using GateKeeper.Core.Services;
+﻿using GateKeeper.Core.Application;
 using GateKeeper.Core.Interfaces;
-using System.Threading.Tasks;
-using GateKeeper.Core.Models.Entities;
 using GateKeeper.Core.Models.ApiModels;
-using GateKeeper.Core.Application;
+using GateKeeper.Core.Models.Entities;
+using GateKeeper.Core.Services;
+using Humanizer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Threading.Tasks;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -38,7 +39,7 @@ namespace GateKeeper.API.Controllers
 
         // POST api/<APIController>
         [HttpPost]
-        public async Task<Dictionary<int, HashSet<string>>> Post([FromBody] AddDomainRequest value)
+        public async Task<Dictionary<int, HashSet<DomainDTO>>> Post([FromBody] AddAllowedDomainsRequest value)
         {
             return await app.AddAsync(value);
         }

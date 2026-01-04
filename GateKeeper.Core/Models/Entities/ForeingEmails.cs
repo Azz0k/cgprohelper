@@ -4,10 +4,10 @@ using System.Text;
 
 namespace GateKeeper.Core.Models.Entities
 {
-    public class LocalMonitoredAddresses
+    public class ForeingEmails
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public required string Email { get; set; }
-        public bool IsReplyAllowed { get; set; }
+        public required string ReceivedDate { get; set; }
     }
 }

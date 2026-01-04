@@ -100,30 +100,34 @@ namespace GateKeeper.Tests
         {
             return Guid.NewGuid().ToString(); 
         }
-        private async Task<Dictionary<int, List<string>>?> PostToDomainAPI()
+        private async Task<Dictionary<int, List<DomainDTO>>?> PostToDomainAPI()
         {
             // await DoMigrateAsync();
             string d1 = GenerateRandomDomainName();
             string d2 = GenerateRandomDomainName();
-            var addDomainRequest = new AddDomainRequest() { Domain = [$"{d1}.{d1}", $"{d2}.{d2}", $"{d2}.{d2}", ".", "1,txt"] };
+            var addDomainRequest = new AddAllowedDomainsRequest() { Domain = [$"{d1}.{d1}", $"{d2}.{d2}", $"{d2}.{d2}", ".", "1,txt"] };
             var response = await _client.PostAsJsonAsync(apiUri, addDomainRequest);
             response.EnsureSuccessStatusCode();
-            Dictionary<int, List<string>>? addedData = await response.Content.ReadFromJsonAsync<Dictionary<int, List<string>>>();
+            Dictionary<int, List<DomainDTO>>? addedData = await response.Content.ReadFromJsonAsync<Dictionary<int, List<DomainDTO>>>();
             return addedData;
         }
         [Fact]
         public async Task DomainApi_Post_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<string>>? addedData = await PostToDomainAPI();
+            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
             Assert.NotNull(addedData);
             Assert.Equal(2, addedData.Count);
             Assert.Equal(2, addedData[201].Count);
+            foreach (var item in addedData[201])
+            {
+                Assert.NotEqual(0, item.Id);
+            }
             Assert.Equal(2, addedData[400].Count);
         }
         [Fact]
         public async Task DomainApi_Get_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<string>>? addedData = await PostToDomainAPI();
+            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
             List<DomainDTO>? domains = await GetAsync(apiUri);
             Assert.NotNull(domains);
             Assert.NotEmpty(domains);
@@ -131,7 +135,7 @@ namespace GateKeeper.Tests
         [Fact]
         public async Task DomainApi_Delete_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<string>>? addedData = await PostToDomainAPI();
+            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
             List<DomainDTO>? domains = await GetAsync(apiUri);
             Assert.NotNull(domains);
             int idToDelete = domains.First().Id;
@@ -147,7 +151,7 @@ namespace GateKeeper.Tests
         [Fact]
         public async Task DomainApi_Put_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<string>>? addedData = await PostToDomainAPI();
+            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
             List<DomainDTO>? domains = await GetAsync(apiUri);
             Assert.NotNull(domains);
             var updateRequest = new UpdateDomainRequest() { Id = domains.First().Id, Domain = "update.update" };

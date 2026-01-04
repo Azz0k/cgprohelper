@@ -4,6 +4,7 @@ using GateKeeper.Core.Models;
 using GateKeeper.Core.Models.ApiModels;
 using GateKeeper.Core.Models.Entities;
 using GateKeeper.Core.Services;
+using GateKeeper.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -19,28 +20,31 @@ namespace GateKeeper.Core.Application
         { 
             this.dbservice = dbservice;
         }
-        public async Task<Dictionary<int,HashSet<string>>> AddAsync(AddDomainRequest domains)
+        public async Task<Dictionary<int,HashSet<DomainDTO>>> AddAsync(AddAllowedDomainsRequest domains)
         {
-            HashSet<string> okAdded = [];
-            HashSet<string> error = [];
-            Dictionary<int, HashSet<string>> result = new();
+            HashSet<DomainDTO> okAdded = new(new DomainDTOComparer());
+            HashSet<DomainDTO> error = new(new DomainDTOComparer());
+            Dictionary<int, HashSet<DomainDTO>> result = new();
             result[201] = okAdded;
             result[400] = error;
             if (domains?.Domain == null) return result;
-            foreach (var domain in domains.Domain)
+            foreach (string dom in domains.Domain)
             {
-                if (isDomainPatternValid(domain) && !okAdded.Contains(domain))
+                string domain = dom.Trim();
+                DomainDTO dTO = new() { Domain = domain };
+                if (isDomainPatternValid(domain) && !okAdded.Contains(dTO))
                 {
-                    bool isEntityExists = await dbservice.ExistsAsync<AllowedDomains>(d => d.Domain == domain);
+                    bool isEntityExists = await dbservice.FindAsync<AllowedDomains>(d => d.Domain == domain) == null ? false:true;
                     if (!isEntityExists)
                     {
-                        await dbservice.CreateAsync(new AllowedDomains(domain));
-                        okAdded.Add(domain);
+                        var createdEntity = await dbservice.CreateAsync(new AllowedDomains(domain));
+                        dTO.Id = createdEntity.Id;
+                        okAdded.Add(dTO);
                     }
                 }
-                if (!okAdded.Contains(domain))
+                if (!okAdded.Contains(dTO))
                 {
-                    error.Add(domain); 
+                    error.Add(dTO); 
                 }
                 
             }
@@ -50,7 +54,7 @@ namespace GateKeeper.Core.Application
         public async Task<int> UpdateAsync(UpdateDomainRequest request)
         {
             if (!isDomainPatternValid(request.Domain)) return 400;
-            return await dbservice.UpdateAsync<AllowedDomains>(request.Id, (AllowedDomains domain) => domain.Domain = request.Domain)?200:404;
+            return await dbservice.UpdateAsync<AllowedDomains>(request.Id, (AllowedDomains domain) => domain.Domain = request.Domain.Trim())?200:404;
         }
     }
 }

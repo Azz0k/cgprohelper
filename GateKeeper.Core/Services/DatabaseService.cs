@@ -27,10 +27,12 @@ namespace GateKeeper.Core.Services
             await _db.Database.CloseConnectionAsync();
 
         }
-        public async Task CreateAsync<T>(T entity) where T : class 
+        public async Task<T> CreateAsync<T>(T entity) where T : class 
         {
             await _db.Set<T>().AddAsync(entity);
             await _db.SaveChangesAsync();
+            return entity;
+
         }
         public async Task<bool> UpdateAsync<T>(int id, Action<T> updateAction) where T : class
         {
@@ -48,9 +50,9 @@ namespace GateKeeper.Core.Services
             await _db.SaveChangesAsync();
             return true;
         }
-        public async Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class
+        public async Task<T?> FindAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            return await _db.Set<T>().AnyAsync(predicate);
+            return await _db.Set<T>().FirstOrDefaultAsync(predicate);
         }
         public async Task<List<T>> ReadAllAsync<T>() where T: class 
         {

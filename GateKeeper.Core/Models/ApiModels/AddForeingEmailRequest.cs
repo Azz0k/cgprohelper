@@ -4,8 +4,8 @@ using System.Text;
 
 namespace GateKeeper.Core.Models.ApiModels
 {
-    public class AddDomainRequest
+    public class AddForeingEmailRequest
     {
-        public List<string>? Domain { get; set; }
+        public string? Email { get; set; } 
     }
 }

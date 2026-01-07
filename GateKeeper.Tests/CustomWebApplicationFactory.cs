@@ -39,7 +39,6 @@ namespace GateKeeper.Tests
                         typeof(DbConnection));
 
                 services.Remove(dbConnectionDescriptor);
-
                 // Create open SqliteConnection so EF won't automatically close it.
                 services.AddSingleton<DbConnection>(container =>
                 {

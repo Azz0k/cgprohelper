@@ -22,17 +22,17 @@ using static System.Net.Mime.MediaTypeNames;
 namespace GateKeeper.Tests
 {
     public class AllowedDomainsAPITests :
-    IClassFixture<CustomWebApplicationFactory<Program>>
+    IClassFixture<CustomWebApplicationFactory<APIProgram>>
     {
 
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program>
+        private readonly CustomWebApplicationFactory<APIProgram>
             _factory;
         private string apiUri = "/api/AllowedDomains";
 
         public AllowedDomainsAPITests(
-            CustomWebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
+            CustomWebApplicationFactory<APIProgram> factory, ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
             _factory = factory;

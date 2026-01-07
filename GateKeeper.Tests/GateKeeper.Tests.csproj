@@ -17,10 +17,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GateKeeper.API\GateKeeper.API.csproj" />
+    <ProjectReference Include="..\GateKeeper.Core\GateKeeper.Core.csproj" />
+    <ProjectReference Include="..\GateKeeper.Helper\GateKeeper.Helper.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="HelperAppSettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

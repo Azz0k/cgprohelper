@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace CGProToCCAddressHelper.Utils
+namespace CGPGK.Utils
 {
     internal static class Utils
     {

@@ -1,4 +1,4 @@
-﻿using CGProToCCAddressHelper.Utils;
+﻿using CGPGK.Utils;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
@@ -8,10 +8,10 @@ using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using static CGProToCCAddressHelper.Utils.Utils;
+using static CGPGK.Utils.Utils;
 
 
-namespace CGProToCCAddressHelper.Models
+namespace CGPGK.Models
 {
     internal interface ICheckUpdate
     {

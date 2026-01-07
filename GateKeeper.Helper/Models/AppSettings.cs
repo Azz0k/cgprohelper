@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CGProToCCAddressHelper.Models
+namespace CGPGK.Models
 {
     public class AppSettings
     {

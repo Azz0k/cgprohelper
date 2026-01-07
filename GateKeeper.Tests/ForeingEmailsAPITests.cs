@@ -26,18 +26,18 @@ using static System.Net.Mime.MediaTypeNames;
 namespace GateKeeper.Tests
 {
     public class ForeingEmailsAPITests :
-    IClassFixture<CustomWebApplicationFactory<Program>>
+    IClassFixture<CustomWebApplicationFactory<APIProgram>>
     {
 
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program>
+        private readonly CustomWebApplicationFactory<APIProgram>
             _factory;
         private string apiUri = "/api/ForeingEmails";
         private string depprecatedEmail = "test@deprecated.date";
 
         public ForeingEmailsAPITests(
-            CustomWebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
+            CustomWebApplicationFactory<APIProgram> factory, ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
             _factory = factory;

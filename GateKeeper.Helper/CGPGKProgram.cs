@@ -1,17 +1,19 @@
-﻿using FluentFTP;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using CGPGK.Models;
+using CGPGK.Services;
+using CGPGK.Utils;
+using FluentFTP;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using CGProToCCAddressHelper.Services;
-using CGProToCCAddressHelper.Models;
-using CGProToCCAddressHelper.Utils;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
-namespace CGProToCCAddressHelper
+[assembly: InternalsVisibleTo("GateKeeper.Tests")]
+namespace CGPGK
 {
-    internal class Program
+    internal class CGPGKProgram
     {
         static async System.Threading.Tasks.Task Main(string[] args)
         {

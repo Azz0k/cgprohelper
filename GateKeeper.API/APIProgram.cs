@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GateKeeper.API
 {
-    public class Program
+    public class APIProgram
     {
         public static async Task Main(string[] args)
         {

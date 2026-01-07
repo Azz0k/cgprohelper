@@ -1,4 +1,4 @@
-﻿using CGProToCCAddressHelper.Models;
+﻿using CGPGK.Models;
 using FluentFTP;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CGProToCCAddressHelper.Utils
+namespace CGPGK.Utils
 {
     internal static class FTP
     {

@@ -26,14 +26,14 @@ using static System.Net.Mime.MediaTypeNames;
 namespace GateKeeper.Tests
 {
     public class LocalMonitoredEmailsAPITests :
-    IClassFixture<CustomWebApplicationFactory<Program>>
+    IClassFixture<CustomWebApplicationFactory<APIProgram>>
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly CustomWebApplicationFactory<APIProgram> _factory;
         private string apiUri = "/api/LocalMonitoredEmails";
         public LocalMonitoredEmailsAPITests(
-            CustomWebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
+            CustomWebApplicationFactory<APIProgram> factory, ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
             _factory = factory;

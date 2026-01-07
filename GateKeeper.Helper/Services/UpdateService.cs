@@ -1,4 +1,4 @@
-﻿using CGProToCCAddressHelper.Models;
+﻿using CGPGK.Models;
 using FluentFTP;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace CGProToCCAddressHelper.Services
+namespace CGPGK.Services
 {
     internal class UpdateService
     {

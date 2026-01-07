@@ -20,18 +20,18 @@ namespace GateKeeper.Core.Application
         { 
             this.dbservice = dbservice;
         }
-        public async Task<Dictionary<int,HashSet<DomainDTO>>> AddAsync(AddAllowedDomainsRequest domains)
+        public async Task<Dictionary<int,HashSet<AllowedDomainsDTO>>> AddAsync(AddAllowedDomainsRequest domains)
         {
-            HashSet<DomainDTO> okAdded = new(new DomainDTOComparer());
-            HashSet<DomainDTO> error = new(new DomainDTOComparer());
-            Dictionary<int, HashSet<DomainDTO>> result = new();
+            HashSet<AllowedDomainsDTO> okAdded = new(new DomainDTOComparer());
+            HashSet<AllowedDomainsDTO> error = new(new DomainDTOComparer());
+            Dictionary<int, HashSet<AllowedDomainsDTO>> result = new();
             result[201] = okAdded;
             result[400] = error;
             if (domains?.Domain == null) return result;
             foreach (string dom in domains.Domain)
             {
                 string domain = dom.Trim();
-                DomainDTO dTO = new() { Domain = domain };
+                AllowedDomainsDTO dTO = new() { Domain = domain };
                 if (isDomainPatternValid(domain) && !okAdded.Contains(dTO))
                 {
                     bool isEntityExists = await dbservice.FindAsync<AllowedDomains>(d => d.Domain == domain) == null ? false:true;

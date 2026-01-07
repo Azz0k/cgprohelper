@@ -18,5 +18,9 @@ namespace GateKeeper.Core.Utils
         {
             return DateTime.Now.ToString("yyyy-MM-dd");
         }
+        public static string GenerateDeprecatedDate()
+        {
+            return DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd");
+        }
     }
 }

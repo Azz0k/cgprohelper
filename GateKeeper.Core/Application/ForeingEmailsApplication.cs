@@ -31,7 +31,19 @@ namespace GateKeeper.Core.Application
             await dbservice.UpdateAsync(foreingEmailInBase.Id, (ForeingEmails email) => email.ReceivedDate = GenerateReceivedDate());
             return foreingEmailInBase.Id;
         }
+        public async Task RemoveDeprecatedRecords()
+        {
+            string deprecatedDate = GenerateDeprecatedDate();
+            List<ForeingEmails> list = await dbservice.ReadAllAsync<ForeingEmails>();
+            foreach (ForeingEmails email in list)
+            {
+                if (string.Compare(email.ReceivedDate,deprecatedDate)>=0)
+                {
+                    await dbservice.DeleteAsync<ForeingEmails>(email.Id)    ;
+                }
+            }
 
-        //TODO: Clean task, tests
+        }
+      
     }
 }

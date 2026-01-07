@@ -39,7 +39,7 @@ namespace GateKeeper.API.Controllers
 
         // POST api/<APIController>
         [HttpPost]
-        public async Task<Dictionary<int, HashSet<DomainDTO>>> Post([FromBody] AddAllowedDomainsRequest value)
+        public async Task<Dictionary<int, HashSet<AllowedDomainsDTO>>> Post([FromBody] AddAllowedDomainsRequest value)
         {
             return await app.AddAsync(value);
         }

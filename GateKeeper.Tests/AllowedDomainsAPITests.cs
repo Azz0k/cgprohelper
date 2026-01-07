@@ -18,49 +18,10 @@ using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
 using static System.Net.Mime.MediaTypeNames;
+
 namespace GateKeeper.Tests
 {
-
-    public class CustomWebApplicationFactory<TProgram>
-    : WebApplicationFactory<TProgram> where TProgram : class
-    {
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder.ConfigureServices(services =>
-            {
-                var dbContextDescriptor = services.SingleOrDefault(
-                    d => d.ServiceType ==
-                        typeof(IDbContextOptionsConfiguration<AddressesDbContext>));
-
-                services.Remove(dbContextDescriptor);
-
-                var dbConnectionDescriptor = services.SingleOrDefault(
-                    d => d.ServiceType ==
-                        typeof(DbConnection));
-
-                services.Remove(dbConnectionDescriptor);
-
-                // Create open SqliteConnection so EF won't automatically close it.
-                services.AddSingleton<DbConnection>(container =>
-                {
-                    var connection = new SqliteConnection("DataSource=:memory:");
-                    connection.Open();
-
-                    return connection;
-                });
-
-                services.AddDbContext<AddressesDbContext>((container, options) =>
-                {
-                    var connection = container.GetRequiredService<DbConnection>();
-                    options.UseSqlite(connection);
-                });
-            });
-
-            builder.UseEnvironment("Development");
-        }
-    }
-    
-    public class ApiTests :
+    public class AllowedDomainsAPITests :
     IClassFixture<CustomWebApplicationFactory<Program>>
     {
 
@@ -70,7 +31,7 @@ namespace GateKeeper.Tests
             _factory;
         private string apiUri = "/api/AllowedDomains";
 
-        public ApiTests(
+        public AllowedDomainsAPITests(
             CustomWebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
@@ -90,17 +51,17 @@ namespace GateKeeper.Tests
                 db.Database.Migrate();
             }
         }
-        private async Task<List<DomainDTO>?> GetAsync(string apiUri)
+        private async Task<List<AllowedDomainsDTO>?> GetAsync(string apiUri)
         {
             var response = await _client.GetAsync(apiUri);
-            var content = await response.Content.ReadFromJsonAsync<List<DomainDTO>>();
+            var content = await response.Content.ReadFromJsonAsync<List<AllowedDomainsDTO>>();
             return content;
         }
         private string GenerateRandomDomainName()
         {
             return Guid.NewGuid().ToString(); 
         }
-        private async Task<Dictionary<int, List<DomainDTO>>?> PostToDomainAPI()
+        private async Task<Dictionary<int, List<AllowedDomainsDTO>>?> PostToDomainAPI()
         {
             // await DoMigrateAsync();
             string d1 = GenerateRandomDomainName();
@@ -108,13 +69,13 @@ namespace GateKeeper.Tests
             var addDomainRequest = new AddAllowedDomainsRequest() { Domain = [$"{d1}.{d1}", $"{d2}.{d2}", $"{d2}.{d2}", ".", "1,txt"] };
             var response = await _client.PostAsJsonAsync(apiUri, addDomainRequest);
             response.EnsureSuccessStatusCode();
-            Dictionary<int, List<DomainDTO>>? addedData = await response.Content.ReadFromJsonAsync<Dictionary<int, List<DomainDTO>>>();
+            Dictionary<int, List<AllowedDomainsDTO>>? addedData = await response.Content.ReadFromJsonAsync<Dictionary<int, List<AllowedDomainsDTO>>>();
             return addedData;
         }
         [Fact]
         public async Task DomainApi_Post_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
+            Dictionary<int, List<AllowedDomainsDTO>>? addedData = await PostToDomainAPI();
             Assert.NotNull(addedData);
             Assert.Equal(2, addedData.Count);
             Assert.Equal(2, addedData[201].Count);
@@ -127,16 +88,16 @@ namespace GateKeeper.Tests
         [Fact]
         public async Task DomainApi_Get_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
-            List<DomainDTO>? domains = await GetAsync(apiUri);
+            Dictionary<int, List<AllowedDomainsDTO>>? addedData = await PostToDomainAPI();
+            List<AllowedDomainsDTO>? domains = await GetAsync(apiUri);
             Assert.NotNull(domains);
             Assert.NotEmpty(domains);
         }
         [Fact]
         public async Task DomainApi_Delete_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
-            List<DomainDTO>? domains = await GetAsync(apiUri);
+            Dictionary<int, List<AllowedDomainsDTO>>? addedData = await PostToDomainAPI();
+            List<AllowedDomainsDTO>? domains = await GetAsync(apiUri);
             Assert.NotNull(domains);
             int idToDelete = domains.First().Id;
             var response = await _client.DeleteAsync($"{apiUri}/{idToDelete}");
@@ -146,13 +107,13 @@ namespace GateKeeper.Tests
             Assert.Equal(HttpStatusCode.NotFound, code);
             var domainsAfterDelete = await GetAsync(apiUri);
             Assert.NotNull(domainsAfterDelete);
-            Assert.Single(domainsAfterDelete);
+            Assert.DoesNotContain(domainsAfterDelete, e=> e.Id==idToDelete);
         }
         [Fact]
         public async Task DomainApi_Put_ShouldWorkCorrectly()
         {
-            Dictionary<int, List<DomainDTO>>? addedData = await PostToDomainAPI();
-            List<DomainDTO>? domains = await GetAsync(apiUri);
+            Dictionary<int, List<AllowedDomainsDTO>>? addedData = await PostToDomainAPI();
+            List<AllowedDomainsDTO>? domains = await GetAsync(apiUri);
             Assert.NotNull(domains);
             var updateRequest = new UpdateDomainRequest() { Id = domains.First().Id, Domain = "update.update" };
             var response = await _client.PutAsJsonAsync(apiUri, updateRequest);

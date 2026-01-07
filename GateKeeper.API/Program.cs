@@ -22,6 +22,7 @@ namespace GateKeeper.API
             builder.Services.AddDbContext<AddressesDbContext>();
             builder.Services.AddScoped<AllowedDomainsApplication>();
             builder.Services.AddScoped<ForeingEmailsApplication>();
+            builder.Services.AddScoped<LocalMonitoredEmailsApplication>();
             var app = builder.Build();
             //var dbService = app.Services.GetRequiredService<DatabaseService>();
             //await dbService.InitDatabaseAsync();

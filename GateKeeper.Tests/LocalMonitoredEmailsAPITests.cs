@@ -25,18 +25,14 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace GateKeeper.Tests
 {
-    public class ForeingEmailsAPITests :
+    public class LocalMonitoredEmailsAPITests :
     IClassFixture<CustomWebApplicationFactory<Program>>
     {
-
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program>
-            _factory;
-        private string apiUri = "/api/ForeingEmails";
-        private string depprecatedEmail = "test@deprecated.date";
-
-        public ForeingEmailsAPITests(
+        private readonly CustomWebApplicationFactory<Program> _factory;
+        private string apiUri = "/api/LocalMonitoredEmails";
+        public LocalMonitoredEmailsAPITests(
             CustomWebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
@@ -56,66 +52,54 @@ namespace GateKeeper.Tests
                 db.Database.Migrate();
             }
         }
-        private async Task SeedDeprecatedDate()
-        {
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AddressesDbContext>();
-                ForeingEmails newEmail = new ForeingEmails() { Email = depprecatedEmail, ReceivedDate = GenerateDeprecatedDate() };
-                await db.Set<ForeingEmails>().AddAsync(newEmail);
-                await db.SaveChangesAsync();
-            }
-        }
-        private async Task CleanDeprecatedDate()
-        {
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var scopedServices = scope.ServiceProvider;
-                var app = scopedServices.GetRequiredService<ForeingEmailsApplication>();
-                await app.RemoveDeprecatedRecords();
-            }
-        }
-        private async Task<List<ForeingEmailsDTO>?> GetAsync()
-        {
-            var response = await _client.GetAsync(apiUri);
-            var content = await response.Content.ReadFromJsonAsync<List<ForeingEmailsDTO>>();
-            return content;
-        }
         private string GenerateRandomDomainName()
         {
             return Guid.NewGuid().ToString();
         }
-        private async Task<string?> PostToForeignEmailsAPI()
+        private async Task<string?> PostToLocalMonitoredEmailsAPI(bool allowed=false)
         {
             string domain = GenerateRandomDomainName();
-            AddForeingEmailRequest request = new() { Email = $"test@{domain}" };
+            LocalMonitoredEmails request = new() { Email = $"test@{domain}", IsReplyAllowed = allowed};
             var response = await _client.PostAsJsonAsync(apiUri, request);
             response.EnsureSuccessStatusCode();
             string? addedData = await response.Content.ReadAsStringAsync();
             return addedData;
         }
-        [Fact]
-        public async Task ForeignEmailsApi_POST_ShouldWorkCorrectly()
+        private async Task<List<LocalMonitoredEmailsDTO>?> GetAsync()
         {
-            string? createdId = await PostToForeignEmailsAPI();
-            Assert.NotNull(createdId);  
+            var response = await _client.GetAsync(apiUri);
+            var content = await response.Content.ReadFromJsonAsync<List<LocalMonitoredEmailsDTO>>();
+            return content;
+        }
+        [Fact]
+        public async Task LocalMonitoredEmailsApi_POST_ShouldWorkCorrectly()
+        {
+            string? createdId = await PostToLocalMonitoredEmailsAPI();
+            Assert.NotNull(createdId);
             Assert.NotEmpty(createdId);
         }
         [Fact]
         public async Task ForeignEmailsApi_GET_ShouldWorkCorrectly()
         {
-            await PostToForeignEmailsAPI();
-            List<ForeingEmailsDTO>? res = await GetAsync();
-            Assert.NotNull(res);
-            Assert.NotEmpty(res);
-            Assert.Equal(GenerateReceivedDate(), res[0].ReceivedDate);
+            string? postResponceContent = await PostToLocalMonitoredEmailsAPI();
+            Assert.NotNull(postResponceContent);
+            int notAllowedID = int.Parse(postResponceContent);
+            postResponceContent = await PostToLocalMonitoredEmailsAPI(true);
+            Assert.NotNull(postResponceContent);
+            int allowedID = int.Parse(postResponceContent);
+            List<LocalMonitoredEmailsDTO>? getResponceContent = await GetAsync();
+            Assert.NotNull(getResponceContent);
+            Assert.NotEmpty(getResponceContent);
+            Assert.Contains(getResponceContent, e=> e.Id == notAllowedID);
+            Assert.True(getResponceContent.Where(e => e.Id == allowedID).All(e=>e.IsReplyAllowed));
+            Assert.Contains(getResponceContent, e => e.Id == allowedID);
+            Assert.True(getResponceContent.Where(e => e.Id == notAllowedID).All(e => !e.IsReplyAllowed));
         }
         [Fact]
         public async Task ForeignEmailsApi_DELETE_ShouldWorkCorrectly()
         {
-            string? createdId = await PostToForeignEmailsAPI();
-            List<ForeingEmailsDTO>? res = await GetAsync();
+            string? createdId = await PostToLocalMonitoredEmailsAPI();
+            List<LocalMonitoredEmailsDTO>? res = await GetAsync();
             Assert.NotNull(res);
             int idToDelete = res[0].Id;
             var response = await _client.DeleteAsync($"{apiUri}/{idToDelete}");
@@ -126,18 +110,6 @@ namespace GateKeeper.Tests
             var domainsAfterDelete = await GetAsync();
             Assert.NotNull(domainsAfterDelete);
             Assert.DoesNotContain(domainsAfterDelete, e => e.Id == idToDelete);
-        }
-        [Fact]
-        public async Task ForeignEmailsApplication_RemoveDeprecatedRecords_ShouldWorkCorrectly()
-        {
-            await SeedDeprecatedDate();
-            List<ForeingEmailsDTO>? res = await GetAsync();
-            Assert.NotNull(res);
-            Assert.Contains(res, e => e.Email == depprecatedEmail);
-            await CleanDeprecatedDate();
-            res = await GetAsync();
-            Assert.NotNull(res);
-            Assert.DoesNotContain(res, e => e.Email == depprecatedEmail);
         }
     }
 }

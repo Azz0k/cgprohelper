@@ -44,12 +44,6 @@ namespace GateKeeper.API.Controllers
             return await app.AddAsync(value);
         }
 
-        // GET api/<APIController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
         // DELETE api/<APIController>/5
         [HttpDelete("{id}")]
         public async Task<StatusCodeResult> Delete(int id)

@@ -23,9 +23,17 @@ namespace GateKeeper.API
             builder.Services.AddScoped<AllowedDomainsApplication>();
             builder.Services.AddScoped<ForeingEmailsApplication>();
             builder.Services.AddScoped<LocalMonitoredEmailsApplication>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("DevFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            });
             var app = builder.Build();
-            //var dbService = app.Services.GetRequiredService<DatabaseService>();
-            //await dbService.InitDatabaseAsync();
+            app.UseCors("DevFrontend");
             using var scope = app.Services.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<DatabaseService>();
             await dbService.InitDatabaseAsync();

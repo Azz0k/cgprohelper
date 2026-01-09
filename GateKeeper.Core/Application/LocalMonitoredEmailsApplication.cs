@@ -40,7 +40,16 @@ namespace GateKeeper.Core.Application
                 e.Email = newEmail.Trim();
                 e.IsReplyAllowed = isAllowed;
             };
-            return await dbservice.UpdateAsync(request.Id, updateDelegate) ? 200 : 404;
+            bool res = false;
+            try
+            {
+                res = await dbservice.UpdateAsync(request.Id, updateDelegate);
+            }
+            catch
+            {
+                return 400;
+            }
+            return res ? 200 : 404;
         }
     }
 }

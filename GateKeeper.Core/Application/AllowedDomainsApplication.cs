@@ -54,7 +54,15 @@ namespace GateKeeper.Core.Application
         public async Task<int> UpdateAsync(UpdateDomainRequest request)
         {
             if (!isDomainPatternValid(request.Domain)) return 400;
-            return await dbservice.UpdateAsync<AllowedDomains>(request.Id, (AllowedDomains domain) => domain.Domain = request.Domain.Trim())?200:404;
+            bool res = false;
+            try
+            {
+                res = await dbservice.UpdateAsync<AllowedDomains>(request.Id, (AllowedDomains domain) => domain.Domain = request.Domain.Trim());
+            }
+            catch  {
+                return 400;
+            }
+            return res ? 200 : 404;
         }
     }
 }

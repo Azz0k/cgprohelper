@@ -20,6 +20,7 @@ class LocalEmailsState {
     this.editingId = id;
   }
   handleApplyClick = () => {
+    this.UpdateLocalEmail(this.editingId).catch(() => {});
     this.editingId = -1;
   }
   handleCheckedChange = (id:number) => {
@@ -53,19 +54,33 @@ class LocalEmailsState {
     }
   }
   async UpdateLocalEmail(id:number){
+    this.error = null;
     const queryClient = new QueryClient();
+    let response;
     try{
       const body = JSON.stringify(this.localEmails.find(value => value.id === id));
-      const response = await queryClient.fetchQuery({
+      console.log(body);
+      response = await queryClient.fetchQuery({
         queryKey: ["localEmails", "put", id],
         queryFn: () => fetch('http://localhost:64346/api/localmonitoredemails/', {
           method: 'PUT',
           body: body,
+          headers: {
+            "Content-Type": "application/json",
+          }
         })
       });
     }
     finally {
-
+      console.log(response);
+      switch (response?.status){
+        case 400:
+          this.error = 'Email already exists';
+          break;
+        case 404:
+          this.error = 'Not Found. Please update this page.';
+          break;
+      }
     }
   }
 }

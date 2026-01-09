@@ -23,7 +23,7 @@ namespace GateKeeper.API.Controllers
         {
             return await app.GetAllRecordsAsync<LocalMonitoredEmails>();
         }
-
+        [HttpPost]
         // POST api/<LocalMonitoredEmailsController>
         public async Task<int> Post([FromBody] AddLocalMonitoredEmailsRequest value)
         {
@@ -31,7 +31,7 @@ namespace GateKeeper.API.Controllers
         }
 
         // PUT api/<LocalMonitoredEmailsController>/5
-        [HttpPut("{id}")]
+        [HttpPut]
         public async Task<StatusCodeResult> Put(int id, [FromBody] UpdateLocalMonitoredEmailsRequest value)
         {
             int code = await app.UpdateAsync(value);

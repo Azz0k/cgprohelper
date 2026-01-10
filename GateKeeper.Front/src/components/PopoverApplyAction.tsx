@@ -1,17 +1,17 @@
 import {observer} from "mobx-react";
 import {Popover} from "antd";
-import {localEmailsState} from "../pages/localEmails/LocalEmailsState.ts";
 import {ApplyAction} from "./ApplyAction.tsx";
+import {rootStore} from "../store/RootStore.ts";
 
 export const PopoverApplyAction = observer(({id})=>{
   return(
     <Popover
-      open={localEmailsState.error !== null}
-      title={localEmailsState.error}
-      content={<a onClick={localEmailsState.handleCancelEditClick}>Cancel</a>}
+      open={rootStore.localState.errorEditEntity !== null}
+      title={rootStore.localState.errorEditEntity}
+      content={<a onClick={rootStore.localState.handleCancelEditClick}>Cancel</a>}
     >
       <span>
-        {id===localEmailsState.editingId && <ApplyAction/>}
+        {id===rootStore.localState.editingId && <ApplyAction/>}
       </span>
     </Popover>
   );

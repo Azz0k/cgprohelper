@@ -1,6 +1,7 @@
-import {makeAutoObservable, computed} from "mobx";
+import {makeObservable, observable, action, computed} from "mobx";
 import React from 'react';
 import {addLocalEmail, deleteLocalEmail, loadAllLocalEmails, updateLocalEmail} from "../../services/localEmails.api.ts";
+import {BasePageStore} from "../../store/BasePageStore.tsx";
 
 export type LocalEmail = {
   id: number;
@@ -13,19 +14,39 @@ type NewEmail = {
 }
 
 type LocalEmails = LocalEmail[];
-class LocalEmailsState {
+class LocalEmailsState extends BasePageStore{
   localEmails: LocalEmail[] = [];
-  loading = false;
-  error:string | null = null;
-  errorAddEmail:string | null = null;
-  editingId:number = -1;
   originalLocalEmail!: LocalEmail;
-  showDeleteDialogId: number = -1;
-  addPopoverOpened: boolean = false;
-  searchText:string = "";
+
   constructor() {
-    makeAutoObservable(this, {
-      LocalEmailsFound:computed
+    super();
+    makeObservable(this, {
+      localEmails: observable,
+      originalLocalEmail: observable,
+      loading: observable,
+      errorEditEntity: observable,
+      errorAddEntity: observable,
+      editingId :observable,
+      showDeleteDialogId: observable,
+      addPopoverOpened: observable,
+      searchText:observable,
+      LocalEmailsFound:computed,
+      handleSearchChange:action,
+      handleEditClick:action,
+      handleCancelEditClick:action,
+      handleApplyClick:action,
+      handleDeleteClick:action,
+      handleYesClickAfterDeleteClick:action,
+      handleNoClickAfterDeleteClick:action,
+      handleCheckedChange:action,
+      handleInputChange:action,
+      handlePlusClick:action,
+      handleCancelAddClick:action,
+      handleSaveClick:action,
+      AddLocalEmail:action,
+      LoadAllLocalEmails:action,
+      UpdateLocalEmail:action,
+      DeleteLocalEmail:action,
     });
   }
   get LocalEmailsFound(){
@@ -34,9 +55,7 @@ class LocalEmailsState {
     else
       return this.localEmails;
   }
-  handleSearchChange = (e:React.ChangeEvent<HTMLInputElement>) => {
-    this.searchText=e.target.value;
-  }
+
   handleEditClick = (id:number) => {
     this.editingId = id;
     const element = this.localEmails.find(value => value.id === id);
@@ -49,31 +68,26 @@ class LocalEmailsState {
       if (value.id === this.editingId) return {...this.originalLocalEmail}
       else return value;
     });
-    this.error = null;
+    this.errorEditEntity = null;
     this.editingId = -1;
   }
   handleApplyClick = () => {
     this.UpdateLocalEmail(this.editingId).then(()=>{
-      if (this.error === null) {
+      if (this.errorEditEntity === null) {
         this.editingId = -1
       }
     });
   }
-  handleDeleteClick = (id:number) => {
-    this.showDeleteDialogId = id;
-  }
+
   handleYesClickAfterDeleteClick =()=>{
     this.DeleteLocalEmail(this.showDeleteDialogId).then((result) => {
-      console.log(result);
       if (result) {
         this.localEmails = this.localEmails.filter(value => value.id !== this.showDeleteDialogId);
       }
       this.showDeleteDialogId = -1;
     })
   }
-  handleNoClickAfterDeleteClick = () => {
-    this.showDeleteDialogId = -1;
-  }
+
   handleCheckedChange = (id:number) => {
     this.localEmails = this.localEmails.map(value => {
       if (value.id === id) {
@@ -90,19 +104,14 @@ class LocalEmailsState {
       return value;
     });
   }
-  handlePlusClick = () => {
-    this.addPopoverOpened = !this.addPopoverOpened;
-  }
-  handleCancelAddClick = () => {
-    this.addPopoverOpened = false;
-    this.errorAddEmail = null;
-  }
-  handleSaveClick =(email:string, isReplyAllowed:boolean) => {
+
+
+  handleSaveClick = (email:string, isReplyAllowed:boolean) => {
     const newEmail:NewEmail = {email:email, isReplyAllowed:isReplyAllowed};
     this.AddLocalEmail(newEmail).then((result)=>{this.addPopoverOpened = !result});
   }
   async AddLocalEmail(newEmail:NewEmail){
-    this.errorAddEmail = null;
+    this.errorAddEntity = null;
     try {
       const body = JSON.stringify(newEmail);
       const res: string = await addLocalEmail(body);
@@ -114,14 +123,14 @@ class LocalEmailsState {
           return true;
         }
       }
-      this.errorAddEmail = "Email already exists";
+      this.errorAddEntity = "Email already exists";
       return false;
     }
     catch(error:unknown){
       console.log(error);
       switch (error){
         default:
-          this.errorAddEmail = 'Unknown error';
+          this.errorAddEntity = 'Unknown error';
           break;
       }
       return false;
@@ -137,7 +146,7 @@ class LocalEmailsState {
     }
   }
   async UpdateLocalEmail(id:number){
-    this.error = null;
+    this.errorEditEntity = null;
     try{
       const body = JSON.stringify(this.localEmails.find(value => value.id === id));
       await updateLocalEmail(body);
@@ -146,13 +155,13 @@ class LocalEmailsState {
       console.log(error);
       switch (error){
         case 400:
-          this.error = 'Email already exists';
+          this.errorEditEntity = 'Email already exists';
           break;
         case 404:
-          this.error = 'Not Found. Please update this page.';
+          this.errorEditEntity = 'Not Found. Please update this page.';
           break;
         default:
-          this.error = 'Unknown error';
+          this.errorEditEntity = 'Unknown error';
           break;
       }
     }

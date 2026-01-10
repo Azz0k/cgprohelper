@@ -1,8 +1,8 @@
 import {observer} from "mobx-react";
-import {localEmailsState} from "../pages/localEmails/LocalEmailsState.ts";
+import {rootStore} from "../store/RootStore.ts";
 
 export const ApplyAction = observer(()=>{
   return(
-    <a onClick={()=>localEmailsState.handleApplyClick()}>Apply</a>
+    <a onClick={()=>rootStore.localState.handleApplyClick()}>Apply</a>
   );
 });

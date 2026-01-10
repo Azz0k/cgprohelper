@@ -3,7 +3,7 @@ import {useEffect} from "react";
 import {localEmailsState} from "./LocalEmailsState.ts";
 import { Table } from 'antd';
 import {localEmailsColumns} from "../../components/localEmailsColumns.tsx";
-import {AddLocalEmail} from "../../components/AddLocalEmail.tsx";
+import {AddElementAndSearch} from "../../components/AddElementAndSearch.tsx";
 
 export const LocalEmails = observer(() => {
   useEffect(()=>{
@@ -21,7 +21,7 @@ export const LocalEmails = observer(() => {
           columns={localEmailsColumns}
           rowKey={(record)=>record.id}
         />
-        <AddLocalEmail/>
+        <AddElementAndSearch/>
       </div>
     );
 });

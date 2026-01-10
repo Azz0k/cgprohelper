@@ -1,8 +1,8 @@
 import type { TableProps } from 'antd';
 import { Input } from 'antd';
 import {Observer} from "mobx-react";
-import {localEmailsState} from "../pages/localEmails/LocalEmailsState.ts";
-import type { LocalEmail } from "../pages/localEmails/LocalEmailsState.ts"
+import {localEmailsState} from "../pages/LocalEmails/LocalEmailsState.ts";
+import type { LocalEmail } from "../pages/LocalEmails/LocalEmailsState.ts"
 import {TableActions} from "./TableActions.tsx";
 import {TableCheckbox} from "./TableCheckbox.tsx";
 

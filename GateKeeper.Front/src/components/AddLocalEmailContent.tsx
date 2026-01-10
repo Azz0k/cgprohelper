@@ -1,6 +1,6 @@
 import {observer} from "mobx-react";
 import {Button, Checkbox, Input, Space} from "antd";
-import {localEmailsState} from "../pages/localEmails/LocalEmailsState.ts";
+import {localEmailsState} from "../pages/LocalEmails/LocalEmailsState.ts";
 import {useState} from "react";
 
 export const AddLocalEmailContent = observer(()=>{
@@ -11,6 +11,7 @@ export const AddLocalEmailContent = observer(()=>{
       <Space size="small">
         <Input
           value={email}
+          placeholder="email@domain.com"
           onChange={(e)=>setEmail(e.target.value)}
         />
         <Checkbox

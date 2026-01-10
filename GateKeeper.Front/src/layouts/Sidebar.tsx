@@ -14,7 +14,7 @@ export const Sidebar = observer(()=>{
   const { Sider } = Layout;
 
   return (
-    <Sider style={style}>
+    <Sider style={style} width={250}>
       <Menu
         selectedKeys={[rootStore.globalMenuSelectedKey]}
         mode="inline"

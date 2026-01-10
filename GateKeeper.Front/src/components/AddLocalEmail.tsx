@@ -1,19 +1,32 @@
 import {observer} from "mobx-react";
-import {Popover} from "antd";
+import { Popover, Space} from "antd";
 import {localEmailsState} from "../pages/localEmails/LocalEmailsState.ts";
 import {AddLocalEmailContent} from "./AddLocalEmailContent.tsx";
+import Search from "antd/es/input/Search";
 
 export const AddLocalEmail = observer(()=>{
   return(
-    <div className="absolute bottom-5 left-5">
+    <div className="absolute -top-17 right-5">
       <Popover
         title={localEmailsState.errorAddEmail}
-        placement="right"
+        placement="left"
         open={localEmailsState.addPopoverOpened}
         content={<AddLocalEmailContent/>}
       >
         <span>
-          <a className="text-6xl select-none" onClick={localEmailsState.handlePlusClick}>+</a>
+          <Space>
+            <a className="text-6xl select-none" onClick={localEmailsState.handlePlusClick}>+</a>
+            <Search
+              className="mt-3"
+              placeholder="Input search text"
+              enterButton="Search"
+              size="middle"
+              value={localEmailsState.searchText}
+              onChange={e=>localEmailsState.handleSearchChange(e)}
+              allowClear
+            />
+          </Space>
+
         </span>
       </Popover>
 

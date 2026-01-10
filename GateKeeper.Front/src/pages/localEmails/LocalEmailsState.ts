@@ -1,4 +1,4 @@
-import {makeAutoObservable} from "mobx";
+import {makeAutoObservable, computed} from "mobx";
 import React from 'react';
 import {addLocalEmail, deleteLocalEmail, loadAllLocalEmails, updateLocalEmail} from "../../services/localEmails.api.ts";
 
@@ -22,8 +22,20 @@ class LocalEmailsState {
   originalLocalEmail!: LocalEmail;
   showDeleteDialogId: number = -1;
   addPopoverOpened: boolean = false;
+  searchText:string = "";
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      LocalEmailsFound:computed
+    });
+  }
+  get LocalEmailsFound(){
+    if (this.searchText)
+      return this.localEmails.filter(value => value.email.includes(this.searchText));
+    else
+      return this.localEmails;
+  }
+  handleSearchChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    this.searchText=e.target.value;
   }
   handleEditClick = (id:number) => {
     this.editingId = id;

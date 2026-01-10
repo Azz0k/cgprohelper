@@ -17,7 +17,7 @@ export const LocalEmails = observer(() => {
           loading={localEmailsState.loading}
           size="small"
           className='w-full'
-          dataSource={localEmailsState.localEmails}
+          dataSource={localEmailsState.LocalEmailsFound}
           columns={localEmailsColumns}
           rowKey={(record)=>record.id}
         />

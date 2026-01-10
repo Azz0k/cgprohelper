@@ -3,6 +3,7 @@ import {useEffect} from "react";
 import {localEmailsState} from "./LocalEmailsState.ts";
 import { Table } from 'antd';
 import {localEmailsColumns} from "../../components/localEmailsColumns.tsx";
+import {AddLocalEmail} from "../../components/AddLocalEmail.tsx";
 
 export const LocalEmails = observer(() => {
   useEffect(()=>{
@@ -11,14 +12,16 @@ export const LocalEmails = observer(() => {
 
   return(
 
-      <div className='flex w-full'>
-        {localEmailsState.loading && 'Loading...'}
+      <div className='relative flex w-full h-full'>
         <Table
+          loading={localEmailsState.loading}
+          size="small"
           className='w-full'
           dataSource={localEmailsState.localEmails}
           columns={localEmailsColumns}
           rowKey={(record)=>record.id}
         />
+        <AddLocalEmail/>
       </div>
     );
 });

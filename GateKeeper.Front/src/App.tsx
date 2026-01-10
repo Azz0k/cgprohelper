@@ -22,7 +22,7 @@ const App = () => {
                         <RouterProvider router={Router} />
                     </Content>
                 </Layout>
-                <Footer className="Footer">version 0.5 (C)MIT</Footer>
+                <Footer className="Footer">version 0.5</Footer>
             </Layout>
         </>
     )

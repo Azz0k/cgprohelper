@@ -21,9 +21,9 @@ export const localEmailsColumns:TableProps<LocalEmail>['columns'] = [
       <Observer>
         {
           ()=>(
-            <Input disabled={record.id!=localEmailsState.editingId}
+            <Input disabled={record.id != localEmailsState.editingId}
                    value={record.email}
-                   onChange={(e)=>localEmailsState.handleInputChange(record.id,e)}
+                   onChange={(e) => localEmailsState.handleInputChange(record.id, e)}
             />
           )
         }
@@ -34,6 +34,7 @@ export const localEmailsColumns:TableProps<LocalEmail>['columns'] = [
     title: 'Разрешен ли ответ на письма',
     dataIndex: 'isReplyAllowed',
     key: 'isReplyAllowed',
+    width: '10%',
     render: (_, record) => (
       <TableCheckbox id={record.id} checked={record.isReplyAllowed}/>
     )
@@ -41,6 +42,7 @@ export const localEmailsColumns:TableProps<LocalEmail>['columns'] = [
   {
     title: 'Действия',
     key: 'action',
+    width: '10%',
     render: (_, record) => (
       <TableActions id={record.id}/>
     ),

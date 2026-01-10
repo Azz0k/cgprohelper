@@ -3,6 +3,7 @@ import {Router} from "../routes/Router.tsx";
 import {routes} from "../routes/routes.ts";
 import {localEmailsState} from "../pages/LocalEmails/LocalEmailsState.ts";
 import {allowedDomainState} from "../pages/AllowedDomains/AllowedDomainState.ts";
+import type {LocalState} from "../interfaces/LocalState.ts";
 
 
 
@@ -27,7 +28,7 @@ class RootStore {
         const href = routes[e.key as "1" | "2" | "3"];
         Router.navigate({href}).catch(console.error);
     }
-    get localState(){
+    get localState(): LocalState{
         return  this.pathName === '/'
           ? localEmailsState
           : allowedDomainState;

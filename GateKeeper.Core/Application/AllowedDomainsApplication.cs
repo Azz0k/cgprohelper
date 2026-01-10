@@ -54,6 +54,7 @@ namespace GateKeeper.Core.Application
         public async Task<int> UpdateAsync(UpdateDomainRequest request)
         {
             if (!isDomainPatternValid(request.Domain)) return 400;
+            if (request.Id < 0) return 400;
             bool res = false;
             try
             {

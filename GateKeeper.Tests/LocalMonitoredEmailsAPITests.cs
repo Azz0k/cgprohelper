@@ -79,7 +79,7 @@ namespace GateKeeper.Tests
             Assert.NotEmpty(createdId);
         }
         [Fact]
-        public async Task ForeignEmailsApi_GET_ShouldWorkCorrectly()
+        public async Task LocalMonitoredEmailsApi_GET_ShouldWorkCorrectly()
         {
             string? postResponceContent = await PostToLocalMonitoredEmailsAPI();
             Assert.NotNull(postResponceContent);
@@ -96,7 +96,7 @@ namespace GateKeeper.Tests
             Assert.True(getResponceContent.Where(e => e.Id == notAllowedID).All(e => !e.IsReplyAllowed));
         }
         [Fact]
-        public async Task ForeignEmailsApi_DELETE_ShouldWorkCorrectly()
+        public async Task LocalMonitoredEmailsApi_DELETE_ShouldWorkCorrectly()
         {
             string? createdId = await PostToLocalMonitoredEmailsAPI();
             List<LocalMonitoredEmailsDTO>? res = await GetAsync();
@@ -110,6 +110,32 @@ namespace GateKeeper.Tests
             var domainsAfterDelete = await GetAsync();
             Assert.NotNull(domainsAfterDelete);
             Assert.DoesNotContain(domainsAfterDelete, e => e.Id == idToDelete);
+        }
+        [Fact]
+        public async Task LocalMonitoredEmailsApi_PUT_ShouldWorkCorrectly()
+        {
+            await PostToLocalMonitoredEmailsAPI();
+            await PostToLocalMonitoredEmailsAPI();
+            List<LocalMonitoredEmailsDTO>? emails = await GetAsync();
+            Assert.NotNull(emails);
+            var updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = emails[0].Id, Email = "update@update.ru" };
+            var response = await _client.PutAsJsonAsync(apiUri, updateRequest);
+            response.EnsureSuccessStatusCode();
+            emails = await GetAsync();
+            Assert.NotNull(emails);
+            Assert.Contains<LocalMonitoredEmailsDTO>(emails, (LocalMonitoredEmailsDTO e) => e.Email == updateRequest.Email);
+            updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = emails.Last().Id, Email = "update@update.ru" };
+            response = await _client.PutAsJsonAsync(apiUri, updateRequest);
+            var code = response.StatusCode;
+            Assert.Equal(HttpStatusCode.BadRequest, code);
+            updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = -1, Email = "update1@update.ru" };
+            response = await _client.PutAsJsonAsync(apiUri, updateRequest);
+            code = response.StatusCode;
+            Assert.Equal(HttpStatusCode.BadRequest, code);
+            updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = int.MaxValue, Email = "update1@update.ru" };
+            response = await _client.PutAsJsonAsync(apiUri, updateRequest);
+            code = response.StatusCode;
+            Assert.Equal(HttpStatusCode.NotFound, code);
         }
     }
 }

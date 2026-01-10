@@ -33,6 +33,7 @@ namespace GateKeeper.Core.Application
 
         public async Task<int> UpdateAsync(UpdateLocalMonitoredEmailsRequest request)
         {
+            if (request.Id < 0) return 400;
             Action<LocalMonitoredEmails> updateDelegate = delegate (LocalMonitoredEmails e)
             {
                 string newEmail = request.Email ?? e.Email;

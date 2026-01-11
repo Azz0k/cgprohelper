@@ -1,6 +1,6 @@
 import {queryClient} from "../main.tsx";
 
-const localEmailApiUrl = 'http://localhost:64346/api/localmonitoredemails';
+const localEmailApiUrl = import.meta.env.VITE_LOCAL_EMAILS_API_URL;
 export const updateLocalEmail = async (body:string)=>{
   const res = await fetch(localEmailApiUrl, {
     method: 'PUT',

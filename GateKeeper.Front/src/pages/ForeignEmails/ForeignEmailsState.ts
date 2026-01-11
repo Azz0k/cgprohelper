@@ -1,0 +1,60 @@
+import {BasePageStore} from "../../store/BasePageStore.tsx";
+import {computed, makeObservable, action, observable} from "mobx";
+import {loadAllForeignEmails} from "../../services/foreignEmails.api.ts";
+
+
+export type ForeignEmail = {
+  id: number;
+  email: string;
+  receivedDate:string;
+}
+type ForeignEmails = ForeignEmail[];
+
+class ForeignEmailsState  extends  BasePageStore{
+  foreignEmails: ForeignEmails = [];
+  constructor() {
+    super();
+    makeObservable(this, {
+      foreignEmailFound: computed,
+      foreignEmails: observable,
+      loading: observable,
+      errorEditEntity: observable,
+      errorAddEntity: observable,
+      editingId: observable,
+      showDeleteDialogId: observable,
+      addPopoverOpened: observable,
+      searchText: observable,
+      handleSearchChange: action,
+      handleApplyClick: action,
+      handleCancelEditClick: action,
+      handleYesClickAfterDeleteClick: action,
+      handleEditClick: action,
+      LoadAllForeignEmails: action,
+    });
+  }
+  get foreignEmailFound(){
+    if (this.searchText)
+      return this.foreignEmails.filter(value => value.email.includes(this.searchText));
+    else
+      return this.foreignEmails;
+  }
+  handleApplyClick=()=>{
+  }
+  handleEditClick=()=>{
+  }
+  handleCancelEditClick=()=>{
+  }
+  handleYesClickAfterDeleteClick=()=>{
+  }
+  async LoadAllForeignEmails(){
+    this.loading = true;
+    try{
+      this.foreignEmails = await loadAllForeignEmails() as ForeignEmails;
+    }
+    finally{
+      this.loading = false;
+    }
+  }
+}
+
+export const foreignEmailsState = new ForeignEmailsState();

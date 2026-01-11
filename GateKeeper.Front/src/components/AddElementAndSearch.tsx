@@ -6,7 +6,7 @@ import {rootStore} from "../store/RootStore.ts";
 import {AddAllowedDomainContent} from "./AddAllowedDomainContent.tsx";
 
 
-export const AddElementAndSearch = observer(()=>{
+export const AddElementAndSearch = observer(({showAddElement = true, showSearchElement =true})=>{
   let content;
   switch (rootStore.pathName){
     case "/":
@@ -26,16 +26,17 @@ export const AddElementAndSearch = observer(()=>{
       >
         <span>
           <Space>
-            <a className="text-6xl select-none" onClick={rootStore.localState.handlePlusClick}>+</a>
+            <a className='text-6xl select-none data-[invisibleAddElement="true"]:invisible' data-invisibleAddElement={!showAddElement} onClick={rootStore.localState.handlePlusClick}>+</a>
             <Search
-              className="mt-3"
+              data-invisibleSearchElement={!showSearchElement}
+              className="mt-3 data-[invisibleSearchElement='true']:invisible"
               placeholder="Input search text"
               enterButton="Search"
               size="middle"
               value={rootStore.localState.searchText}
               onChange={e=>rootStore.localState.handleSearchChange(e)}
               allowClear
-            />
+            />;
           </Space>
 
         </span>

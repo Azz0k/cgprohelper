@@ -1,6 +1,6 @@
 import {queryClient} from "../main.tsx";
 
-const allowedDomainsApiUrl = 'http://localhost:64346/api/AllowedDomains';
+const allowedDomainsApiUrl = import.meta.env.VITE_ALLOWED_DOMAINS_API_URL;
 export const addAllowedDomain = async (body:string)=>{
   const res = await fetch(allowedDomainsApiUrl, {
     method: 'POST',

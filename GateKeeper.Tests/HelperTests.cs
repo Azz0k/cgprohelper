@@ -54,6 +54,8 @@ namespace GateKeeper.Tests
         public async Task Helper_ShouldWorkCorrectly()
         {
             await updateService.UpdateDataFirstTime();
+
+
         }
     }
     

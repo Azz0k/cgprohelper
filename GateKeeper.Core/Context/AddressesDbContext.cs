@@ -11,6 +11,7 @@ namespace GateKeeper.Core.Context
         public DbSet<ForeingEmails> foreingAddresses { get; set; }
         public DbSet<LocalMonitoredEmails> localMonitoredAddresses { get; set; }
         public DbSet<AllowedDomains> allowedDomains { get; set; }
+        public DbSet<AllowedEmails> allowedEmails { get; set; }
         private string fileName = "AddressDatabase.sqlite";
         public AddressesDbContext()
         {

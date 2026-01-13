@@ -110,7 +110,7 @@ class AllowedDomainState extends BasePageStore{
     try {
       const body = JSON.stringify(newDomain);
       const res: ResultCreatedAllowedDomain = await addAllowedDomain(body);
-      const id = res[201][0].id;
+      const id = res[201][0]?.id;
       if (id) {
         if (!this.allowedDomains.find(value => value.id === id)) {
           const newAllowedDomainElement:AllowedDomain = {domain:newDomain.domain[0], id:id};

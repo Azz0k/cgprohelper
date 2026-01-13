@@ -20,10 +20,10 @@ namespace GateKeeper.Core.Application
         { 
             this.dbservice = dbservice;
         }
-        public async Task<List<AllowedDomains>> GetAllRecordsAsync()
+        public async Task<List<AllowedDomainsDTO>> GetAllRecordsAsync()
         {
-            return await dbservice.QueryAsync<AllowedDomains>((AllowedDomains d) => d.isManuallyAdded == true);
-
+            var res = await dbservice.QueryAsync<AllowedDomains>((AllowedDomains d) => d.isManuallyAdded == true);
+            return  res.Select(d=> new AllowedDomainsDTO() { Id = d.Id, Domain = d.Domain }).ToList();
         }
         public async Task<Dictionary<int,HashSet<AllowedDomainsDTO>>> AddAsync(AddAllowedDomainsRequest domains)
         {
@@ -55,7 +55,6 @@ namespace GateKeeper.Core.Application
             }
             return result;
         }
-
         public async Task<int> UpdateAsync(UpdateDomainRequest request)
         {
             if (!isDomainPatternValid(request.Domain)) return 400;
@@ -69,6 +68,29 @@ namespace GateKeeper.Core.Application
                 return 400;
             }
             return res ? 200 : 404;
+        }
+        public async Task AddAsync(string domain)
+        {
+            bool isEntityExists = await dbservice.FindAsync<AllowedDomains>(d => d.Domain == domain) == null ? false : true;
+            if (!isEntityExists)
+            {
+                var createdEntity = await dbservice.CreateAsync(new AllowedDomains(domain, false));
+            }
+        }
+        public async Task SyncTable(List<string> ftpDomains)
+        {
+            var dbAddresses = await dbservice.ReadAllAsync<AllowedDomains>();
+            var toRemove = dbAddresses.Where(e => !e.isManuallyAdded && !ftpDomains.Contains(e.Domain)).ToList();
+            foreach (var domain in toRemove)
+            {
+                await dbservice.DeleteAsync<AllowedDomains>(domain.Id);
+            }
+            var dbDomains = dbAddresses.Select(e => e.Domain).ToHashSet();
+            var toAdd = ftpDomains.Where(e => !dbDomains.Contains(e));
+            foreach (var item in toAdd)
+            {
+                await dbservice.CreateAsync<AllowedDomains>(new AllowedDomains(item, false));
+            }
         }
     }
 }

@@ -24,9 +24,9 @@ namespace GateKeeper.API.Controllers
         }
         // GET: api/<APIController>
         [HttpGet]
-        public async Task<IEnumerable<AllowedDomains>> Get()
+        public async Task<IEnumerable<AllowedDomainsDTO>> Get()
         {
-            return await app.GetAllRecordsAsync<AllowedDomains>();
+            return await app.GetAllRecordsAsync();
         }
         // PUT api/<APIController>
         [HttpPut]

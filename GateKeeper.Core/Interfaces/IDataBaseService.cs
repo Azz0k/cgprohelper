@@ -16,7 +16,9 @@ namespace GateKeeper.Core.Interfaces
         Task<List<T>> ReadAllAsync<T>() where T : class;
         Task<bool> UpdateAsync<T>(int id, Action<T> updateAction) where T : class;
         Task<bool> DeleteAsync<T>(int id) where T : class;
-        
+        Task<List<T>> QueryAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
+
+
 
     }
 }

@@ -54,6 +54,10 @@ namespace GateKeeper.Core.Services
         {
             return await _db.Set<T>().FirstOrDefaultAsync(predicate);
         }
+        public async Task<List<T>> QueryAsync<T>(Expression<Func<T, bool>> predicate) where T : class
+        {
+            return await _db.Set<T>().Where<T>(predicate).ToListAsync();
+        }
         public async Task<List<T>> ReadAllAsync<T>() where T: class 
         {
             return  await _db.Set<T>().ToListAsync();

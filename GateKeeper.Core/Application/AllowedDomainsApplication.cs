@@ -92,5 +92,9 @@ namespace GateKeeper.Core.Application
                 await dbservice.CreateAsync<AllowedDomains>(new AllowedDomains(item, false));
             }
         }
+        public async Task<bool> IsDomainExists(string domain)
+        {
+            return await dbservice.FindAsync<AllowedDomains>(e => e.Domain == domain) == null ? false : true;
+        }
     }
 }

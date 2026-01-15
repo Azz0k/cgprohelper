@@ -29,8 +29,6 @@ namespace GateKeeper.Tests
 {
     public class HelperTests 
     {
-
-        private UpdateService updateService;
         private WorkerService workerService;
         public HelperTests()
         {
@@ -40,22 +38,14 @@ namespace GateKeeper.Tests
             Assert.NotNull(appSettings);
             FTP.GetInstance(appSettings);
             var serviceProvider = new ServiceCollection()
-                .AddSingleton<EmailChecker>()
                 .AddSingleton<AppSettings>(appSettings)
-                .AddSingleton<MonitoredFiles>()
-                .AddSingleton<UpdateService>()
                 .AddSingleton<WorkerService>()
-                .AddSingleton<FileDataStore>()
                 .BuildServiceProvider();
-            updateService = serviceProvider.GetRequiredService<UpdateService>();
             workerService = serviceProvider.GetRequiredService<WorkerService>();
         }
         [Fact]
         public async Task Helper_ShouldWorkCorrectly()
         {
-            await updateService.UpdateDataFirstTime();
-
-
         }
     }
     

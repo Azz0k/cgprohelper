@@ -9,6 +9,7 @@ namespace CGPGK.Utils
 {
     internal static class Utils
     {
+        private static string me = "GateKeeper";
         public static string? GetRecipient(string line)
         {
             string pattern = @".*<(.*)>";
@@ -39,8 +40,18 @@ namespace CGPGK.Utils
         }
         public static void PrintLogMessage(string message)
         {
-            Print($"* CGProToCCAddressHelper {message}");
+            Print($"* {me} {message}");
         }
+        public static void PrintGoodMessage(string lineNumber)
+        {
+            Print($"{lineNumber} OK");
+        }
+        public static void PrintBadMessage(string lineNumber)
+        {
+            Print($"{lineNumber} ERROR \"{me}: You are not allowed to send this message\"");
+        }
+
+        
         public static void Print(string message)
         {
             Console.WriteLine(message);

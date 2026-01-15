@@ -11,12 +11,8 @@ namespace CGPGK.Models
         public required AppConnectionSettings ConnectionSettings { get; init; }
         public required string baseDir { get; init; } //The directory where CGPro places files
         public required string currentDir { get; init; } //The directory for your own needs 
-        public required string[] allowedDomains { get; init; }
-        public required string emailsLocalFullFileName { get; init; }
         public required int updateIntervalInSeconds { get; init; }
-        public required string monitoredSendersFileName { get; init; }
-        public required string replyAllowedSendersFileName { get; init; }  
-        public required string replyAllowedRecipientsFileName { get; init; }
+        public required string connectionString { get; init; }
     }
 
     public class AppConnectionSettings

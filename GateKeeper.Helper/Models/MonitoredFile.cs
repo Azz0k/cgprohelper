@@ -36,4 +36,38 @@ namespace CGPGK.Models
             modifiedTime = time;
         }
     }
+    internal class MonitoredFileOnFTP : MonitoredFile
+    {
+        [SetsRequiredMembers]
+        public MonitoredFileOnFTP(string fullName, FileTypes fileType) : base(fullName, fileType)
+        {
+        }
+        public async Task<bool> CheckFileAsync()
+        {
+            bool isChanged = false;
+            var ftp = FTP.GetInstance();
+            if (ftp == null) return false;
+            var file = await ftp.FileInfo(this);
+            if (this.modifiedTime != file?.ModifiedTime)
+                isChanged = true;
+            return isChanged;
+        }
+        public async Task SaveNewTimeAsync()
+        {
+            var ftp = FTP.GetInstance();
+            if (ftp == null) return;
+            var file = await ftp.FileInfo(this);
+            modifiedTime = file?.ModifiedTime ?? modifiedTime;
+        }
+        public async Task<List<string>> ReadAllLinesIfChangedAsync()
+        {
+            var lines = new List<string>();
+            bool isChanged = await CheckFileAsync();
+            if (!isChanged) return lines;
+            var ftp = FTP.GetInstance();
+            if (ftp != null)
+                lines = await ftp.DownloadFileFromFTPAsync(this.FullName);
+            return lines;
+        }
+    }
 }

@@ -35,5 +35,16 @@ namespace GateKeeper.Core.Application
                 await dbservice.CreateAsync<AllowedEmails>(new AllowedEmails() { Email = item });
             }
         }
+        public async Task AddAsync(List<string> ftpEmails)
+        {
+           foreach (var email in ftpEmails)
+           {
+               bool isEntityExists = await dbservice.FindAsync<AllowedEmails>(d => d.Email == email) == null ? false : true;
+               if (!isEntityExists)
+               {
+                   var createdEntity = await dbservice.CreateAsync(new AllowedEmails() { Email = email});
+               }
+           }
+        }
     }
 }

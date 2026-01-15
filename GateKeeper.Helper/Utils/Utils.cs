@@ -51,7 +51,6 @@ namespace CGPGK.Utils
             Print($"{lineNumber} ERROR \"{me}: You are not allowed to send this message\"");
         }
 
-        
         public static void Print(string message)
         {
             Console.WriteLine(message);

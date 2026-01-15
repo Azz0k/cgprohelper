@@ -5,6 +5,8 @@ using FluentFTP;
 using GateKeeper.Core.Application;
 using GateKeeper.Core.Context;
 using GateKeeper.Core.Services;
+using GateKeeper.Helper.Application;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,14 +35,17 @@ namespace CGPGK
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<AppSettings>(appSettings)
                 .AddSingleton<WorkerService>()
-                .AddDbContext<AddressesDbContext>()
+                .AddDbContext<AddressesDbContext>(options => options.UseSqlite(appSettings.connectionString))
                 .AddScoped<DatabaseService>()
                 .AddScoped<AllowedDomainsApplication>()
                 .AddScoped<AllowedEmailsApplication>()
                 .AddScoped<ForeingEmailsApplication>()
                 .AddScoped<LocalMonitoredEmailsApplication>()
+                .AddScoped<HelperApplication>()
                 .BuildServiceProvider();
-
+            var scope = serviceProvider.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<DatabaseService>();
+            await dbService.InitDatabaseAsync();
             var workerService = serviceProvider.GetRequiredService<WorkerService>();
             PrintLogMessage("Free");
             await workerService.Work();

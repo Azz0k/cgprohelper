@@ -77,6 +77,13 @@ namespace GateKeeper.Core.Application
                 var createdEntity = await dbservice.CreateAsync(new AllowedDomains(domain, false));
             }
         }
+        public async Task AddAsync(List<string> ftpDomain)
+        {
+            foreach (string ftpDomainItem in ftpDomain)
+            {
+                await AddAsync(ftpDomainItem);
+            }
+        }
         public async Task SyncTable(List<string> ftpDomains)
         {
             var dbAddresses = await dbservice.ReadAllAsync<AllowedDomains>();

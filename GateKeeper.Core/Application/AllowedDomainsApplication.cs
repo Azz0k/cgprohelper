@@ -69,35 +69,17 @@ namespace GateKeeper.Core.Application
             }
             return res ? 200 : 404;
         }
-        public async Task AddAsync(string domain)
+        public async Task SyncTable(HashSet<string> ftpDomains)
         {
-            bool isEntityExists = await dbservice.FindAsync<AllowedDomains>(d => d.Domain == domain) == null ? false : true;
-            if (!isEntityExists)
-            {
-                var createdEntity = await dbservice.CreateAsync(new AllowedDomains(domain, false));
-            }
-        }
-        public async Task AddAsync(List<string> ftpDomain)
-        {
-            foreach (string ftpDomainItem in ftpDomain)
-            {
-                await AddAsync(ftpDomainItem);
-            }
-        }
-        public async Task SyncTable(List<string> ftpDomains)
-        {
-            var dbAddresses = await dbservice.ReadAllAsync<AllowedDomains>();
-            var toRemove = dbAddresses.Where(e => !e.isManuallyAdded && !ftpDomains.Contains(e.Domain)).ToList();
+            var dbAddressesList = await dbservice.ReadAllAsync<AllowedDomains>();
+            var dbAddresses = dbAddressesList.Where(x=>!x.isManuallyAdded).Select(x => x.Domain ).ToHashSet();
+            var toRemove = dbAddresses.Except(ftpDomains);
             foreach (var domain in toRemove)
             {
-                await dbservice.DeleteAsync<AllowedDomains>(domain.Id);
+                await dbservice.DeleteAsync<AllowedDomains>(dbAddressesList.Find(x=>x.Domain==domain).Id);
             }
-            var dbDomains = dbAddresses.Select(e => e.Domain).ToHashSet();
-            var toAdd = ftpDomains.Where(e => !dbDomains.Contains(e));
-            foreach (var item in toAdd)
-            {
-                await dbservice.CreateAsync<AllowedDomains>(new AllowedDomains(item, false));
-            }
+            var toAdd = ftpDomains.Except(dbAddresses);
+            await dbservice.BulkInsertAsync<AllowedDomains>(toAdd.Select(x=>new AllowedDomains(x, false)));
         }
         public async Task<bool> IsDomainExists(string domain)
         {

@@ -52,23 +52,13 @@ namespace GateKeeper.Tests
             string newDomain = GenerateRandomDomain();
             var isFoundDomain = await app.IsDomainExists(newDomain);
             Assert.False(isFoundDomain);
-            List<string> newDomains = [newDomain];
+            HashSet<string> newDomains = [newDomain];
             await app.SyncTable(newDomains);
             isFoundDomain = await app.IsDomainExists(newDomain);
             Assert.True(isFoundDomain);
             await app.SyncTable([]);
             isFoundDomain = await app.IsDomainExists(newDomain);
             Assert.False(isFoundDomain);
-        }
-        [Fact]
-        public async Task AddDomain_ShouldWorkCorrectly()
-        {
-            string newDomain = GenerateRandomDomain();
-            var isFoundDomain = await app.IsDomainExists(newDomain);
-            Assert.False(isFoundDomain);
-            await app.AddAsync(newDomain);
-            isFoundDomain = await app.IsDomainExists(newDomain);
-            Assert.True(isFoundDomain);
         }
     }
 }

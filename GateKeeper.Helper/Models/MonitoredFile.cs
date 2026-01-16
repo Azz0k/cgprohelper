@@ -59,14 +59,13 @@ namespace CGPGK.Models
             var file = await ftp.FileInfo(this);
             modifiedTime = file?.ModifiedTime ?? modifiedTime;
         }
-        public async Task<List<string>> ReadAllLinesIfChangedAsync()
+        public async Task<HashSet<string>> ReadAllLinesAsync()
         {
-            var lines = new List<string>();
-            bool isChanged = await CheckFileAsync();
-            if (!isChanged) return lines;
+            HashSet<string> lines = new();
             var ftp = FTP.GetInstance();
             if (ftp != null)
                 lines = await ftp.DownloadFileFromFTPAsync(this.FullName);
+            await SaveNewTimeAsync();
             return lines;
         }
     }

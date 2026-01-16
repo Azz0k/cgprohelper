@@ -2,8 +2,10 @@
 using GateKeeper.Core.Interfaces;
 using GateKeeper.Core.Models.Entities;
 using GateKeeper.Core.Services;
+using GateKeeper.Core.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace GateKeeper.Core.Application
@@ -20,31 +22,17 @@ namespace GateKeeper.Core.Application
         {
             return await dbservice.FindAsync<AllowedEmails>(e => e.Email == email)==null?false:true;
         }
-        public async Task SyncTable(List<string> ftpEmails)
+        public async Task SyncTable(HashSet<string> ftpEmails)
         {
-            var dbAddresses = await dbservice.ReadAllAsync<AllowedEmails>();
-            var toRemove = dbAddresses.Where(e=>!ftpEmails.Contains(e.Email)).ToList();
+            List<AllowedEmails> dbAddressesList = await dbservice.ReadAllAsync<AllowedEmails>();
+            HashSet<string> dbAddresses = dbAddressesList.Select(x => x.Email).ToHashSet();
+            var toRemove = dbAddresses.Except(ftpEmails);
             foreach (var email in toRemove)
             {
-                await dbservice.DeleteAsync<AllowedEmails>(email.Id);
+                await dbservice.DeleteAsync<AllowedEmails>(dbAddressesList.Find(x=>x.Email == email).Id);
             }
-            var dbEmails = dbAddresses.Select(e => e.Email).ToHashSet();
-            var toAdd = ftpEmails.Where(e => !dbEmails.Contains(e));
-            foreach (var item in toAdd) 
-            {
-                await dbservice.CreateAsync<AllowedEmails>(new AllowedEmails() { Email = item });
-            }
-        }
-        public async Task AddAsync(List<string> ftpEmails)
-        {
-           foreach (var email in ftpEmails)
-           {
-               bool isEntityExists = await dbservice.FindAsync<AllowedEmails>(d => d.Email == email) == null ? false : true;
-               if (!isEntityExists)
-               {
-                   var createdEntity = await dbservice.CreateAsync(new AllowedEmails() { Email = email});
-               }
-           }
+            var toAdd = ftpEmails.Except(dbAddresses);
+            await dbservice.BulkInsertAsync<AllowedEmails>(toAdd.Select(x=>new AllowedEmails { Email=x}));
         }
     }
 }

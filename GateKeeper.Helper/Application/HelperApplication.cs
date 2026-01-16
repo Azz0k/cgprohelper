@@ -1,10 +1,12 @@
 ﻿using CGPGK.Models;
 using GateKeeper.Core.Application;
+using GateKeeper.Helper.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using static CGPGK.Utils.Utils;
 
 namespace GateKeeper.Helper.Application
 {
@@ -14,56 +16,89 @@ namespace GateKeeper.Helper.Application
         private AllowedDomainsApplication domainsApplication;
         private ForeingEmailsApplication foreingEmailsApplication;
         private LocalMonitoredEmailsApplication localMonitoredEmailsApplication;
-        private readonly Dictionary<FileTypes, Func<List<string>, Task>> updateHandlers;
+        private readonly AppSettings appSettings;
         public HelperApplication(
-            AllowedEmailsApplication emailsApplication, 
-            AllowedDomainsApplication domainsApplication, 
-            ForeingEmailsApplication foreingEmailsApplication, 
-            LocalMonitoredEmailsApplication localMonitoredEmailsApplication)
+            AllowedEmailsApplication emailsApplication,
+            AllowedDomainsApplication domainsApplication,
+            ForeingEmailsApplication foreingEmailsApplication,
+            LocalMonitoredEmailsApplication localMonitoredEmailsApplication,
+            AppSettings appSettings)
         {
+            this.appSettings = appSettings;
             this.emailsApplication = emailsApplication;
             this.domainsApplication = domainsApplication;
             this.foreingEmailsApplication = foreingEmailsApplication;
             this.localMonitoredEmailsApplication = localMonitoredEmailsApplication;
-            updateHandlers = new Dictionary<FileTypes, Func<List<string>, Task>>
-            {
-                {
-                    FileTypes.EmailsFull,
-                    async data =>
-                    {
-                        await emailsApplication.SyncTable(data);
-                    }
-                },
-                {
-                    FileTypes.EmailsDiff,
-                    async data =>
-                    {
-                        await emailsApplication.AddAsync(data);
-                    }
-                },
-                {
-                    FileTypes.DomainsFull,
-                    async data =>
-                    {
-                        await domainsApplication.SyncTable(data);
-                    }
-                },
-                {
-                    FileTypes.DomainsDiff,
-                    async data =>
-                    {
-                        await domainsApplication.AddAsync(data);
-                    }
-                }
-            };
         }
-        public async Task UpdateDataFromFTPAsync(FileTypes fileType, List<string> data)
+        public async Task UpdateEmailsFromFTPAsync( HashSet<string> data)
         {
-            if (updateHandlers.TryGetValue(fileType, out var handler))
+            await emailsApplication.SyncTable(data);
+        }
+        public async Task UpdateDomainsFromFTPAsync(HashSet<string> data)
+        {
+            await domainsApplication.SyncTable(data);
+        }
+        public async Task ProcessMessageAsync(string message)
+        {
+            string[] messageParts = message.Split();
+            string lineNumber = messageParts[0];
+            string command = messageParts[1];
+            switch (command)
             {
-                await handler(data);
+                case "quit":
+                    PrintGoodMessage(lineNumber);
+                    Environment.Exit(0);
+                    break;
+                case "intf":
+                    Print($"{lineNumber} INTF 3");
+                    break;
+                case "file":
+                    if (messageParts.Length != 3)
+                    {
+                        PrintGoodMessage(lineNumber);
+                        PrintLogMessage("Error: wrong INTF format!");
+                        return;
+                    }
+                    string fileName = messageParts[2];
+                    var file = Path.Combine(appSettings.baseDir, fileName);
+                    EmailFields? emailFields = await ParseEmailFile(file);
+                    if (emailFields == null)
+                    {
+                        PrintGoodMessage(lineNumber);
+                        PrintLogMessage($"{file} file does not exists or is corrupted");
+                    }
+                    break;
+                default:
+                    PrintGoodMessage(lineNumber);
+                    PrintLogMessage($"Error: command {command} is not implemented");
+                    break;
             }
         }
-
+        internal async Task<EmailFields?> ParseEmailFile(string fileName)
+        {
+            EmailFields? result = null;
+            if (!EnsureFileExists(fileName)) return result;
+            using (FileStream fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (BufferedStream bs = new BufferedStream(fs))
+            using (StreamReader sr = new StreamReader(bs))
+            {
+                string? line;
+                while ((line = sr.ReadLine()) != null && line!="")
+                {
+                    string? sender = GetSender(line);
+                    if (sender != null)
+                    {
+                        result = new(sender);
+                    }
+                    string? recipient = GetRecipient(line);
+                    if (recipient != null)
+                    {
+                        if (result == null) return result;
+                        result.To.Add(recipient);
+                    }    
+                }
+                return result;
+            }
+        }
     }
 }

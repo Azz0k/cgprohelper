@@ -11,6 +11,7 @@ namespace GateKeeper.Core.Interfaces
     public interface IDataBaseService
     {
         Task InitDatabaseAsync();
+        Task TruncateWalAsync();
         Task<T> CreateAsync<T> (T entity) where T :class;
         Task<T?> FindAsync<T> (Expression<Func<T, bool>> predicate) where T : class;
         Task<List<T>> ReadAllAsync<T>() where T : class;
@@ -18,7 +19,7 @@ namespace GateKeeper.Core.Interfaces
         Task<bool> DeleteAsync<T>(int id) where T : class;
         Task<List<T>> QueryAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
 
-
+        Task BulkInsertAsync<T>(IEnumerable<T> entitys) where T : class;
 
     }
 }

@@ -52,7 +52,7 @@ namespace GateKeeper.Tests
             string newEmail = GenerateRandomEmail();
             var isFoundEmail = await app.IsEmailExists(newEmail);
             Assert.False(isFoundEmail);
-            List<string> newEmails = [newEmail];
+            HashSet<string> newEmails = [newEmail];
             await app.SyncTable(newEmails);
             isFoundEmail = await app.IsEmailExists(newEmail);
             Assert.True(isFoundEmail);

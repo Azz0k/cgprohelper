@@ -56,5 +56,14 @@ namespace CGPGK.Utils
             Console.WriteLine(message);
             Console.Out.Flush();
         }
+        public static bool EnsureFileExists(string file)
+        {
+            FileInfo fileInfo = new(file);
+            if (!fileInfo.Exists)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

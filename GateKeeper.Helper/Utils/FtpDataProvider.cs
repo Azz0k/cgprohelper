@@ -67,11 +67,11 @@ namespace CGPGK.Utils
             });
             return result;
         }
-        public async Task<List<string>> DownloadFileFromFTPAsync(string fileName)
+        public async Task<HashSet<string>> DownloadFileFromFTPAsync(string fileName)
         {
             var connectionSettings = _appSettings.ConnectionSettings;
             MemoryStream? stream = new MemoryStream();
-            List<string> result = new();
+            HashSet<string> result = new();
             try
             {
                 using (var ftp = new AsyncFtpClient(connectionSettings.host, connectionSettings.login, connectionSettings.password))

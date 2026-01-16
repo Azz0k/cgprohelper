@@ -2,9 +2,12 @@
 using CGPGK.Services;
 using CGPGK.Utils;
 using GateKeeper.API;
+using GateKeeper.Core.Application;
 using GateKeeper.Core.Context;
 using GateKeeper.Core.Models.ApiModels;
 using GateKeeper.Core.Services;
+using GateKeeper.Helper.Application;
+using GateKeeper.Helper.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -29,7 +32,7 @@ namespace GateKeeper.Tests
 {
     public class HelperTests 
     {
-        private WorkerService workerService;
+        private HelperApplication helperApplication;
         public HelperTests()
         {
             var builder = new ConfigurationBuilder().AddJsonFile($"HelperAppSettings.json");
@@ -40,13 +43,32 @@ namespace GateKeeper.Tests
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<AppSettings>(appSettings)
                 .AddSingleton<WorkerService>()
-                .BuildServiceProvider();
-            workerService = serviceProvider.GetRequiredService<WorkerService>();
+                .AddDbContext<AddressesDbContext>(options => options.UseSqlite(appSettings.connectionString))
+                .AddScoped<DatabaseService>()
+                .AddScoped<AllowedDomainsApplication>()
+                .AddScoped<AllowedEmailsApplication>()
+                .AddScoped<ForeingEmailsApplication>()
+                .AddScoped<LocalMonitoredEmailsApplication>()
+                .AddScoped<HelperApplication>()
+                .BuildServiceProvider();    
+            var scope = serviceProvider.CreateScope();
+            helperApplication = scope.ServiceProvider.GetRequiredService<HelperApplication>();
         }
-        [Fact]
-        public async Task Helper_ShouldWorkCorrectly()
+        public static IEnumerable<object[]> TestFiles => new List<object[]>
+    {
+        new object[] { @"HelperTestFiles\NormalEmail.msg", new EmailFields("from@example.com") { To = new HashSet<string> { "a@example.com", "b@example.com" } } },
+
+    };
+        [Theory]
+        [MemberData(nameof(TestFiles))]
+        public async Task TestEmailProcessing(string fileName, EmailFields expected)
         {
+            var file = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+            var res = await helperApplication.ParseEmailFile(Path.Combine(Directory.GetCurrentDirectory(),fileName));
+            Assert.Equal(expected, res);
         }
+
+        
     }
     
 }

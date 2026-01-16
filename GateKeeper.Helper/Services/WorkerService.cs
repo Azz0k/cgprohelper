@@ -4,6 +4,7 @@ using GateKeeper.Core.Models.Entities;
 using GateKeeper.Helper.Application;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,9 +41,11 @@ namespace CGPGK.Services
                 {
                     break;
                 }
-                _ = Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
-                    //ProcessMessage(line);
+                    using var scope = _serviceProvider.CreateScope();
+                    var app = scope.ServiceProvider.GetRequiredService<HelperApplication>();
+                    await app.ProcessMessageAsync(line);
                 });
             }
         }
@@ -71,17 +74,29 @@ namespace CGPGK.Services
         {
             using var scope = _serviceProvider.CreateScope();
             var app = scope.ServiceProvider.GetRequiredService<HelperApplication>();
-            foreach (var pairs in _files)
+            FileTypes emailFull = FileTypes.EmailsFull;
+            MonitoredFileOnFTP emailFullFile = _files[emailFull];
+            FileTypes emailDiff = FileTypes.EmailsDiff;
+            MonitoredFileOnFTP emailDiffFile = _files[emailDiff];
+            if (await emailDiffFile.CheckFileAsync() || await emailFullFile.CheckFileAsync())
             {
-                FileTypes fileType = pairs.Key;
-                MonitoredFileOnFTP file = pairs.Value;
-                List<string> data = await file.ReadAllLinesIfChangedAsync();
-                if (data.Count > 0)
-                {
-                    await app.UpdateDataFromFTPAsync(fileType, data);
-                    PrintLogMessage($"{fileType} updated");
-                }
-
+                var fullData = await emailFullFile.ReadAllLinesAsync();
+                var diffData = await emailDiffFile.ReadAllLinesAsync();
+                fullData.UnionWith(diffData);
+                await app.UpdateEmailsFromFTPAsync(fullData);
+                PrintLogMessage("Emails definitions updated");
+            }
+            FileTypes domainsFull = FileTypes.DomainsFull;
+            FileTypes domainsDiff = FileTypes.DomainsDiff;
+            MonitoredFileOnFTP domainsFullFile = _files[domainsFull];
+            MonitoredFileOnFTP domainsDiffFile = _files[domainsDiff];
+            if (await domainsFullFile.CheckFileAsync() || await domainsDiffFile.CheckFileAsync())
+            {
+                var fullData = await domainsFullFile.ReadAllLinesAsync();
+                var diffData = await domainsDiffFile.ReadAllLinesAsync();
+                fullData.UnionWith(diffData);
+                await app.UpdateDomainsFromFTPAsync(fullData);
+                PrintLogMessage("Domains definitions updated");
             }
         }
     }

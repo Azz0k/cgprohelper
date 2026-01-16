@@ -25,14 +25,24 @@ namespace GateKeeper.Core.Services
             await _db.Database.OpenConnectionAsync();
             await _db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
             await _db.Database.CloseConnectionAsync();
-
+            await TruncateWalAsync();
+        }
+        public async Task TruncateWalAsync()
+        {
+            await _db.Database.OpenConnectionAsync();
+            await _db.Database.ExecuteSqlRawAsync("PRAGMA wal_checkpoint(TRUNCATE);");
+            await _db.Database.CloseConnectionAsync();
         }
         public async Task<T> CreateAsync<T>(T entity) where T : class 
         {
             await _db.Set<T>().AddAsync(entity);
             await _db.SaveChangesAsync();
             return entity;
-
+        }
+        public async Task BulkInsertAsync<T>(IEnumerable<T> entitys) where T : class
+        {
+            await _db.Set<T>().AddRangeAsync(entitys);
+            await _db.SaveChangesAsync();
         }
         public async Task<bool> UpdateAsync<T>(int id, Action<T> updateAction) where T : class
         {
@@ -44,6 +54,7 @@ namespace GateKeeper.Core.Services
         }
         public async Task<bool> DeleteAsync<T>(int id) where T : class
         {
+            if (id <= 0) return false;
             var result = await _db.Set<T>().FindAsync(id);
             if (result == null) return false;
             _db.Set<T>().Remove(result);

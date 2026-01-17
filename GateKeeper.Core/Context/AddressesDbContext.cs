@@ -20,6 +20,12 @@ namespace GateKeeper.Core.Context
         : base(options)
         {
         }
+        protected override void ConfigureConventions(
+            ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<string>().UseCollation("NOCASE");
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -49,6 +55,12 @@ namespace GateKeeper.Core.Context
                 entity.ToTable($"{nameof(AllowedDomains)}");
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Domain).IsUnique();
+            });
+            modelBuilder.Entity<AllowedEmails>(entity =>
+            {
+                entity.ToTable($"{nameof(AllowedEmails)}");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Email).IsUnique();
             });
             base.OnModelCreating(modelBuilder);
         }

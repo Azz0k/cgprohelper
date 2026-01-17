@@ -12,8 +12,8 @@ namespace GateKeeper.Helper.Application
 {
     internal class HelperApplication
     {
-        private AllowedEmailsApplication emailsApplication;
-        private AllowedDomainsApplication domainsApplication;
+        private AllowedEmailsApplication allowedEmailsApplication;
+        private AllowedDomainsApplication allowedDomainsApplication;
         private ForeingEmailsApplication foreingEmailsApplication;
         private LocalMonitoredEmailsApplication localMonitoredEmailsApplication;
         private readonly AppSettings appSettings;
@@ -25,18 +25,18 @@ namespace GateKeeper.Helper.Application
             AppSettings appSettings)
         {
             this.appSettings = appSettings;
-            this.emailsApplication = emailsApplication;
-            this.domainsApplication = domainsApplication;
+            this.allowedEmailsApplication = emailsApplication;
+            this.allowedDomainsApplication = domainsApplication;
             this.foreingEmailsApplication = foreingEmailsApplication;
             this.localMonitoredEmailsApplication = localMonitoredEmailsApplication;
         }
         public async Task UpdateEmailsFromFTPAsync( HashSet<string> data)
         {
-            await emailsApplication.SyncTable(data);
+            await allowedEmailsApplication.SyncTable(data);
         }
         public async Task UpdateDomainsFromFTPAsync(HashSet<string> data)
         {
-            await domainsApplication.SyncTable(data);
+            await allowedDomainsApplication.SyncTable(data);
         }
         public async Task ProcessMessageAsync(string message)
         {
@@ -66,6 +66,15 @@ namespace GateKeeper.Helper.Application
                     {
                         PrintGoodMessage(lineNumber);
                         PrintLogMessage($"{file} file does not exists or is corrupted");
+                        return;
+                    }
+                    if (await EnsureSendingAllowed(emailFields))
+                    {
+                        PrintGoodMessage(lineNumber);
+                    }
+                    else
+                    {
+                        PrintBadMessage(lineNumber);
                     }
                     break;
                 default:
@@ -99,6 +108,37 @@ namespace GateKeeper.Helper.Application
                 }
                 return result;
             }
+        }
+        internal async Task<bool> EnsureSendingAllowed(EmailFields emailFields)
+        {
+            bool isEmailMonitored = await localMonitoredEmailsApplication.IsEmailExists(emailFields.From);
+            if (isEmailMonitored)
+            {
+                bool isReplyAllowed = await localMonitoredEmailsApplication.IsReplyAllowed(emailFields.From);
+                foreach (string recipient in emailFields.To)
+                {
+                    if (isReplyAllowed)
+                    {
+                        if (await foreingEmailsApplication.IsEmailExists(recipient))
+                            continue;
+                    }
+
+                    string domain = recipient.Substring(recipient.IndexOf('@') + 1);
+                    if (await allowedEmailsApplication.IsEmailExists(recipient)) continue;
+                    if (await allowedDomainsApplication.IsDomainExists(domain)) continue;
+                    return false;
+                }
+                return true;
+            }
+            foreach (string recipient in emailFields.To)
+            {
+                if (await localMonitoredEmailsApplication.IsReplyAllowed(recipient))
+                {
+                    await foreingEmailsApplication.AddAsync(new Core.Models.ApiModels.AddForeingEmailRequest() { Email = emailFields.From });
+                    break;
+                }
+            }
+            return true;
         }
     }
 }

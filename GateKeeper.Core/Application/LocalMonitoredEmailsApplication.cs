@@ -52,5 +52,15 @@ namespace GateKeeper.Core.Application
             }
             return res ? 200 : 404;
         }
+        public async Task<bool> IsEmailExists(string email)
+        {
+            return await dbservice.FindAsync<LocalMonitoredEmails>(e => e.Email == email) == null ? false : true;
+        }
+        public async Task<bool> IsReplyAllowed(string email)
+        {
+            var entity = await dbservice.FindAsync<LocalMonitoredEmails>(e => e.Email == email);
+            if (entity == null) return false;
+            return entity.IsReplyAllowed;
+        }
     }
 }

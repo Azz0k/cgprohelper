@@ -44,6 +44,10 @@ namespace GateKeeper.Core.Application
             }
 
         }
-      
+        public async Task<bool> IsEmailExists(string email)
+        {
+            return await dbservice.FindAsync<ForeingEmails>(e => e.Email == email) == null ? false : true;
+        }
+
     }
 }

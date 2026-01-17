@@ -43,7 +43,18 @@ namespace GateKeeper.Tests
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<AppSettings>(appSettings)
                 .AddSingleton<WorkerService>()
-                .AddDbContext<AddressesDbContext>(options => options.UseSqlite(appSettings.connectionString))
+                .AddSingleton<DbConnection>(container =>
+                {
+                    var connection = new SqliteConnection("DataSource=:memory:");
+                    connection.Open();
+
+                    return connection;
+                })
+                .AddDbContext<AddressesDbContext>((container, options) =>
+                {
+                    var connection = container.GetRequiredService<DbConnection>();
+                    options.UseSqlite(connection);
+                })
                 .AddScoped<DatabaseService>()
                 .AddScoped<AllowedDomainsApplication>()
                 .AddScoped<AllowedEmailsApplication>()
@@ -55,15 +66,16 @@ namespace GateKeeper.Tests
             helperApplication = scope.ServiceProvider.GetRequiredService<HelperApplication>();
         }
         public static IEnumerable<object[]> TestFiles => new List<object[]>
-    {
-        new object[] { @"HelperTestFiles\NormalEmail.msg", new EmailFields("from@example.com") { To = new HashSet<string> { "a@example.com", "b@example.com" } } },
+        {
+            new object[] { @"HelperTestFiles/NormalEmail.msg", new EmailFields("from@example.com") { To = new HashSet<string> { "a@example.com", "b@example.com" } } },
+            new object[] { @"HelperTestFiles/SingleToEmail.msg", new EmailFields("from@example.com") { To = new HashSet<string> { "a@example.com" } } },
+            new object[] { @"HelperTestFiles/ReverseOrderToEmail.msg", new EmailFields("from@example.com") { To = new HashSet<string> { "a@example.com", "b@example.com" } } },
 
-    };
+        };
         [Theory]
         [MemberData(nameof(TestFiles))]
-        public async Task TestEmailProcessing(string fileName, EmailFields expected)
+        public async Task TestEmailFileProcessing(string fileName, EmailFields expected)
         {
-            var file = Path.Combine(Directory.GetCurrentDirectory(), fileName);
             var res = await helperApplication.ParseEmailFile(Path.Combine(Directory.GetCurrentDirectory(),fileName));
             Assert.Equal(expected, res);
         }

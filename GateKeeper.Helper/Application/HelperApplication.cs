@@ -111,6 +111,7 @@ namespace GateKeeper.Helper.Application
         }
         internal async Task<bool> EnsureSendingAllowed(EmailFields emailFields)
         {
+            string domain;
             bool isEmailMonitored = await localMonitoredEmailsApplication.IsEmailExists(emailFields.From);
             if (isEmailMonitored)
             {
@@ -123,17 +124,21 @@ namespace GateKeeper.Helper.Application
                             continue;
                     }
 
-                    string domain = recipient.Substring(recipient.IndexOf('@') + 1);
+                    domain = recipient.Substring(recipient.IndexOf('@') + 1);
                     if (await allowedEmailsApplication.IsEmailExists(recipient)) continue;
                     if (await allowedDomainsApplication.IsDomainExists(domain)) continue;
                     return false;
                 }
                 return true;
             }
+            domain = emailFields.From.Substring(emailFields.From.IndexOf('@') + 1);
+            if (await allowedEmailsApplication.IsEmailExists(emailFields.From)) return true;
+            if (await allowedDomainsApplication.IsDomainExists(domain)) return true;
             foreach (string recipient in emailFields.To)
             {
                 if (await localMonitoredEmailsApplication.IsReplyAllowed(recipient))
                 {
+
                     await foreingEmailsApplication.AddAsync(new Core.Models.ApiModels.AddForeingEmailRequest() { Email = emailFields.From });
                     break;
                 }

@@ -10,13 +10,8 @@ namespace GateKeeper.Core.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_allowedEmails",
-                table: "allowedEmails");
 
-            migrationBuilder.RenameTable(
-                name: "allowedEmails",
-                newName: "AllowedEmails");
+
 
             migrationBuilder.AlterColumn<string>(
                 name: "Email",

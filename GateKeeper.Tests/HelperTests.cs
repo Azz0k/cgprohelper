@@ -26,15 +26,23 @@ using System.Net.Http.Json;
 using System.Runtime.InteropServices.Marshalling;
 using System.Security.Claims;
 using Xunit.Abstractions;
+using GateKeeper.Core.Models.Entities;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Mvc.DataAnnotations;
 
 namespace GateKeeper.Tests
 {
     public class HelperTests 
     {
+        private static List<AllowedEmails> allowedEmails = [];
+        private static List<AllowedDomains> allowedDomains = new List<AllowedDomains>();
+        private static List<LocalMonitoredEmails> localMonitoredEmails = new List<LocalMonitoredEmails>();
+        private static List<ForeingEmails> foreingEmails = new List<ForeingEmails>();
         private HelperApplication helperApplication;
+        private AddressesDbContext db;
         public HelperTests()
         {
+            GenerateTestData();
             var builder = new ConfigurationBuilder().AddJsonFile($"HelperAppSettings.json");
             IConfiguration config = builder.Build();
             var appSettings = config.GetSection("Settings").Get<AppSettings>();
@@ -64,6 +72,40 @@ namespace GateKeeper.Tests
                 .BuildServiceProvider();    
             var scope = serviceProvider.CreateScope();
             helperApplication = scope.ServiceProvider.GetRequiredService<HelperApplication>();
+            db = scope.ServiceProvider.GetRequiredService<AddressesDbContext>();
+            db.Database.Migrate();
+            SeedData();
+        }
+        private string GenRandStr()
+        {
+            return Guid.NewGuid().ToString();
+        }
+        private void GenerateTestData()
+        {
+            allowedEmails.Add(new AllowedEmails() { Email = $"AlLoWedEmAil@{GenRandStr()}"});
+            localMonitoredEmails.Add(new LocalMonitoredEmails() { Email = "replyAllowed@example.com", IsReplyAllowed = true });
+            localMonitoredEmails.Add(new LocalMonitoredEmails() { Email = "replyNOTallowed@example.com", IsReplyAllowed = false });
+            allowedDomains.Add(new AllowedDomains("example.com"));
+        }
+        private void SeedData()
+        {
+
+            foreach(var email in allowedEmails)
+            {
+                db.allowedEmails.Add(email);
+                db.SaveChanges();
+            }
+            foreach(var email in localMonitoredEmails)
+            {
+                db.localMonitoredAddresses.Add(email);
+                db.SaveChanges();
+            }
+            foreach (var domain in allowedDomains)
+            {
+                db.allowedDomains.Add(domain);
+                db.SaveChanges();
+            }
+            db.SaveChanges();
         }
         public static IEnumerable<object[]> TestFiles => new List<object[]>
         {
@@ -79,8 +121,19 @@ namespace GateKeeper.Tests
             var res = await helperApplication.ParseEmailFile(Path.Combine(Directory.GetCurrentDirectory(),fileName));
             Assert.Equal(expected, res);
         }
-
-        
+        public static IEnumerable<object[]> TestMails => new List<object[]>
+        {
+            new object[] { new EmailFields("from@example.com") { To = new HashSet<string> { "NotMonitoredEmail@example.com", "notmonitoredemail@example.com" } }, true },
+            new object[] { new EmailFields("from@example.com") { To = new HashSet<string> { "replyAllowed@example.com", "replyNOTallowed@example.com" } }, true },
+            new object[] { new EmailFields("replyNOTallowed@example.com") { To = new HashSet<string> { allowedEmails[0].Email } }, true },
+        };
+        [Theory]
+        [MemberData(nameof(TestMails))]
+        public async Task TestEmailCheckProcessing (EmailFields emails, bool expected)
+        {
+            bool res = await helperApplication.EnsureSendingAllowed(emails);
+            Assert.Equal(expected, res);
+        }
     }
     
 }

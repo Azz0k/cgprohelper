@@ -72,7 +72,7 @@ namespace GateKeeper.Core.Application
         public async Task SyncTable(HashSet<string> ftpDomains)
         {
             var dbAddressesList = await dbservice.ReadAllAsync<AllowedDomains>();
-            var dbAddresses = dbAddressesList.Where(x=>!x.isManuallyAdded).Select(x => x.Domain ).ToHashSet();
+            var dbAddresses = dbAddressesList.Where(x=>!x.isManuallyAdded).Select(x => x.Domain ).ToHashSet(StringComparer.OrdinalIgnoreCase);
             var toRemove = dbAddresses.Except(ftpDomains);
             foreach (var domain in toRemove)
             {

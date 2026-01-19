@@ -86,7 +86,7 @@ namespace CGPGK.Utils
                             string? line;
                             while ((line = reader.ReadLine()) != null)
                             {
-                                line = line.Trim();
+                                line = line.Trim().ToLowerInvariant();
                                 if (line != "")
                                 {
                                     result.Add(line);

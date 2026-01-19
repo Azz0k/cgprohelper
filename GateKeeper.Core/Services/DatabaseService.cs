@@ -41,8 +41,15 @@ namespace GateKeeper.Core.Services
         }
         public async Task BulkInsertAsync<T>(IEnumerable<T> entitys) where T : class
         {
-            await _db.Set<T>().AddRangeAsync(entitys);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.Set<T>().AddRangeAsync(entitys);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e?.InnerException?.Message);
+            }
         }
         public async Task<bool> UpdateAsync<T>(int id, Action<T> updateAction) where T : class
         {

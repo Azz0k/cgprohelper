@@ -25,7 +25,7 @@ namespace GateKeeper.Core.Application
         public async Task SyncTable(HashSet<string> ftpEmails)
         {
             List<AllowedEmails> dbAddressesList = await dbservice.ReadAllAsync<AllowedEmails>();
-            HashSet<string> dbAddresses = dbAddressesList.Select(x => x.Email).ToHashSet();
+            HashSet<string> dbAddresses = dbAddressesList.Select(x => x.Email).ToHashSet(StringComparer.OrdinalIgnoreCase);
             var toRemove = dbAddresses.Except(ftpEmails);
             foreach (var email in toRemove)
             {

@@ -61,7 +61,7 @@ namespace CGPGK.Models
         }
         public async Task<HashSet<string>> ReadAllLinesAsync()
         {
-            HashSet<string> lines = new();
+            HashSet<string> lines = new(StringComparer.OrdinalIgnoreCase);
             var ftp = FTP.GetInstance();
             if (ftp != null)
                 lines = await ftp.DownloadFileFromFTPAsync(this.FullName);

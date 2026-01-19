@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GateKeeper.Core.Migrations
 {
     [DbContext(typeof(AddressesDbContext))]
-    [Migration("20260117173931_NoCaseCollation")]
-    partial class NoCaseCollation
+    [Migration("20260119093237_InitialCreateProduction")]
+    partial class InitialCreateProduction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

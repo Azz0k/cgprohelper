@@ -11,6 +11,9 @@ namespace GateKeeper.API
     {
         public static async Task Main(string[] args)
         {
+            var settignsBuilder = new ConfigurationBuilder().AddJsonFile($"appsettings.json");
+            IConfiguration config = settignsBuilder.Build();
+            var allowedOrigins = config.GetSection("AllowedOrigins").Get<string>();
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -23,17 +26,19 @@ namespace GateKeeper.API
             builder.Services.AddScoped<AllowedDomainsApplication>();
             builder.Services.AddScoped<ForeingEmailsApplication>();
             builder.Services.AddScoped<LocalMonitoredEmailsApplication>();
-            builder.Services.AddCors(options =>
+            if (allowedOrigins != null)
             {
-                options.AddPolicy("DevFrontend", policy =>
+                builder.Services.AddCors(options =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
+                    options.AddPolicy("FrontEnd", policy =>
+                    {
+                        policy.WithOrigins(allowedOrigins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                    });
                 });
-            });
+            }
             var app = builder.Build();
-            app.UseCors("DevFrontend");
             using var scope = app.Services.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<DatabaseService>();
             await dbService.InitDatabaseAsync();
@@ -42,8 +47,11 @@ namespace GateKeeper.API
             {
                 app.MapOpenApi();
             }
-
-            app.UseAuthorization();
+            if (allowedOrigins != null)
+            {
+                app.UseCors("FrontEnd");
+            }
+                app.UseAuthorization();
 
 
             app.MapControllers();

@@ -42,7 +42,6 @@ namespace GateKeeper.Tests
         private AddressesDbContext db;
         public HelperTests()
         {
-            GenerateTestData();
             var builder = new ConfigurationBuilder().AddJsonFile($"HelperAppSettings.json");
             IConfiguration config = builder.Build();
             var appSettings = config.GetSection("Settings").Get<AppSettings>();
@@ -76,16 +75,22 @@ namespace GateKeeper.Tests
             db.Database.Migrate();
             SeedData();
         }
-        private string GenRandStr()
+        static HelperTests()
+        {
+            GenerateTestData();
+        }
+        private static string GenRandStr()
         {
             return Guid.NewGuid().ToString();
         }
-        private void GenerateTestData()
+        private static void GenerateTestData()
         {
+            if (allowedEmails.Count> 0) return;
             allowedEmails.Add(new AllowedEmails() { Email = $"AlLoWedEmAil@{GenRandStr()}"});
             localMonitoredEmails.Add(new LocalMonitoredEmails() { Email = "replyAllowed@example.com", IsReplyAllowed = true });
             localMonitoredEmails.Add(new LocalMonitoredEmails() { Email = "replyNOTallowed@example.com", IsReplyAllowed = false });
             allowedDomains.Add(new AllowedDomains("example.com"));
+            foreingEmails.Add(new ForeingEmails() { Email = $"foreign@{GenRandStr()}", ReceivedDate=""  });
         }
         private void SeedData()
         {
@@ -105,7 +110,12 @@ namespace GateKeeper.Tests
                 db.allowedDomains.Add(domain);
                 db.SaveChanges();
             }
-            db.SaveChanges();
+            foreach (var item in foreingEmails)
+            {
+                db.foreingAddresses.Add(item);
+                db.SaveChanges();
+            }
+            
         }
         public static IEnumerable<object[]> TestFiles => new List<object[]>
         {
@@ -126,6 +136,11 @@ namespace GateKeeper.Tests
             new object[] { new EmailFields("from@example.com") { To = new HashSet<string> { "NotMonitoredEmail@example.com", "notmonitoredemail@example.com" } }, true },
             new object[] { new EmailFields("from@example.com") { To = new HashSet<string> { "replyAllowed@example.com", "replyNOTallowed@example.com" } }, true },
             new object[] { new EmailFields("replyNOTallowed@example.com") { To = new HashSet<string> { allowedEmails[0].Email } }, true },
+            new object[] { new EmailFields("replyNOTallowed@example.com") { To = new HashSet<string> { allowedEmails[0].Email.ToUpper(), "replyAllowed@example.com".ToUpper() } }, true },
+            new object[] { new EmailFields("replyNOTallowed@example.com") { To = new HashSet<string> { "notallowedemail@notallowed.com" } }, false },
+            new object[] { new EmailFields("replyNOTallowed@example.com") { To = new HashSet<string> { allowedEmails[0].Email, "replyallowed@example.com", "notallowedemail@notallowed.com" } }, false },
+            new object[] { new EmailFields("replyNOTallowed@example.com") { To = new HashSet<string> { allowedEmails[0].Email, "replyallowed@example.com", foreingEmails[0].Email } }, false },
+            new object[] { new EmailFields("replyallowed@example.com") { To = new HashSet<string> { allowedEmails[0].Email, "replyallowed@example.com", foreingEmails[0].Email } }, true },
         };
         [Theory]
         [MemberData(nameof(TestMails))]

@@ -2,6 +2,7 @@ using GateKeeper.Core.Application;
 using GateKeeper.Core.Context;
 using GateKeeper.Core.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using System.Threading.Tasks;
 
 
@@ -19,7 +20,10 @@ namespace GateKeeper.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddSpaStaticFiles(conf =>
+            {
+                conf.RootPath = "wwwroot";
+            });
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
@@ -41,7 +45,6 @@ namespace GateKeeper.API
                 });
             }
             var app = builder.Build();
-            app.UseDefaultFiles();
             app.UseStaticFiles();
             using var scope = app.Services.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<DatabaseService>();
@@ -59,7 +62,10 @@ namespace GateKeeper.API
 
 
             app.MapControllers();
-
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "wwwroot";
+            });
             app.Run();
         }
     }

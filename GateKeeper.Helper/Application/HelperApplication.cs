@@ -42,7 +42,7 @@ namespace GateKeeper.Helper.Application
         {
             string[] messageParts = message.Split();
             string lineNumber = messageParts[0];
-            string command = messageParts[1];
+            string command = messageParts[1].ToLowerInvariant();
             switch (command)
             {
                 case "quit":

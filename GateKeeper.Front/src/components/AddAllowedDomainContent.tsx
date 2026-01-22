@@ -3,13 +3,14 @@ import {Button, Input, Space} from "antd";
 import {useState} from "react";
 import {allowedDomainState} from "../pages/AllowedDomains/AllowedDomainState.ts";
 
-export const AddAllowedDomainContent = observer(()=>{
+export const AddAllowedDomainContent = observer(({inputRef})=>{
   const [domain, setDomain] = useState('');
   return(
     <div className="flex">
       <Space size="small">
         <Input
           value={domain}
+          ref={inputRef}
           placeholder="domain.com"
           onChange={(e)=>setDomain(e.target.value)}
         />

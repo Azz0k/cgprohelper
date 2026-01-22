@@ -1,19 +1,21 @@
 import {observer} from "mobx-react";
-import { Popover, Space} from "antd";
+import {type InputRef, Popover, Space} from "antd";
 import {AddLocalEmailContent} from "./AddLocalEmailContent.tsx";
 import Search from "antd/es/input/Search";
 import {rootStore} from "../store/RootStore.ts";
 import {AddAllowedDomainContent} from "./AddAllowedDomainContent.tsx";
+import {type RefObject, useRef} from "react";
 
 
 export const AddElementAndSearch = observer(({showAddElement = true, showSearchElement =true})=>{
+  const inputRef:RefObject<InputRef| null>  = useRef(null);
   let content;
   switch (rootStore.pathName){
     case "/":
-      content = <AddLocalEmailContent />;
+      content = <AddLocalEmailContent inputRef={inputRef} />;
     break;
     default:
-    content = <AddAllowedDomainContent/>;
+    content = <AddAllowedDomainContent inputRef={inputRef} />;
     break;
   }
   return(
@@ -26,7 +28,10 @@ export const AddElementAndSearch = observer(({showAddElement = true, showSearchE
       >
         <span>
           <Space>
-            <a className='text-6xl select-none data-[invisibleAddElement="true"]:invisible' data-invisibleAddElement={!showAddElement} onClick={rootStore.localState.handlePlusClick}>+</a>
+            <a className='text-6xl select-none data-[invisibleAddElement="true"]:invisible'
+               data-invisibleAddElement={!showAddElement}
+               onClick={()=>{rootStore.localState.handlePlusClick(); queueMicrotask(()=>inputRef.current?.focus())}}
+            >+</a>
             <Search
               data-invisibleSearchElement={!showSearchElement}
               className="mt-3 data-[invisibleSearchElement='true']:invisible"

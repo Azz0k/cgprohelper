@@ -10,7 +10,6 @@ export const LocalEmails = observer(() => {
   useEffect(()=>{
     localEmailsState.LoadAllLocalEmails().catch(()=>console.log("Error"));
   },[]);
-  console.log(window.innerHeight-231);
   return(
 
       <div className='relative flex w-full h-full'>

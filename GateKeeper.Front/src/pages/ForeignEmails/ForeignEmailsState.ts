@@ -1,6 +1,6 @@
 import {BasePageStore} from "../../store/BasePageStore.tsx";
 import {computed, makeObservable, action, observable} from "mobx";
-import {loadAllForeignEmails} from "../../services/foreignEmails.api.ts";
+import {deleteForeignEmail, loadAllForeignEmails} from "../../services/foreignEmails.api.ts";
 
 
 export type ForeignEmail = {
@@ -45,6 +45,12 @@ class ForeignEmailsState  extends  BasePageStore{
   handleCancelEditClick=()=>{
   }
   handleYesClickAfterDeleteClick=()=>{
+    this.DeleteForeignEmail(this.showDeleteDialogId).then((result) => {
+      if (result) {
+        this.foreignEmails = this.foreignEmails.filter(value => value.id !== this.showDeleteDialogId);
+      }
+      this.showDeleteDialogId = -1;
+    })
   }
   async LoadAllForeignEmails(){
     this.loading = true;
@@ -53,6 +59,14 @@ class ForeignEmailsState  extends  BasePageStore{
     }
     finally{
       this.loading = false;
+    }
+  }
+  async DeleteForeignEmail(id:number){
+    try {
+      return await deleteForeignEmail(id)===204;
+    }
+    catch  {
+      return false;
     }
   }
 }

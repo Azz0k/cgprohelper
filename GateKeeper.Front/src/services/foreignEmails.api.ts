@@ -9,3 +9,10 @@ export const loadAllForeignEmails = async () => {
     staleTime: 60_000,
   });
 };
+export const deleteForeignEmail = async (id:number)=>{
+  const res = await fetch(`${foreignEmailsApiUrl}/${id}`, {
+    method: 'DELETE',
+  });
+  console.log(res.status);
+  return res.status;
+}

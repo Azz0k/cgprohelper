@@ -12,6 +12,7 @@ namespace GateKeeper.Core.Context
         public DbSet<LocalMonitoredEmails> localMonitoredAddresses { get; set; }
         public DbSet<AllowedDomains> allowedDomains { get; set; }
         public DbSet<AllowedEmails> allowedEmails { get; set; }
+        public DbSet<User> Users { get; set; }
         private string fileName = "AddressDatabase.sqlite";
         public AddressesDbContext()
         {
@@ -61,6 +62,15 @@ namespace GateKeeper.Core.Context
                 entity.ToTable($"{nameof(AllowedEmails)}");
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Email).IsUnique();
+            });
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("Users");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e=>e.UserName).IsUnique();
+                entity.Property(e=>e.Enabled).IsRequired().HasDefaultValue(true);
+                entity.Property(e=>e.Hash).IsRequired().UseCollation("BINARY");
+                entity.Property(e=>e.FullName).IsRequired();
             });
             base.OnModelCreating(modelBuilder);
         }

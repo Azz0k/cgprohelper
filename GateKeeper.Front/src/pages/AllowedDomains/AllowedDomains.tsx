@@ -20,6 +20,7 @@ export const AllowedDomains = observer(() => {
         dataSource={allowedDomainState.AllowedDomainFound}
         columns={allowedDomainsColumns}
         rowKey={(record)=>record.id}
+        scroll={{ y: window.innerHeight-300 }}
       />
       <AddElementAndSearch/>
     </div>

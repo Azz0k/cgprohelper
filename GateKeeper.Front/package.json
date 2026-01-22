@@ -16,6 +16,7 @@
     "@tanstack/react-router": "^1.146.0",
     "@tanstack/react-table": "^8.21.3",
     "antd": "^6.1.4",
+    "antd-style": "^4.1.0",
     "mobx": "^6.15.0",
     "mobx-devtools-mst": "^0.9.46",
     "mobx-react": "^9.2.1",

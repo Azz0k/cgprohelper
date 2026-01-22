@@ -5,11 +5,12 @@ import { Table } from 'antd';
 import {localEmailsColumns} from "../../components/localEmailsColumns.tsx";
 import {AddElementAndSearch} from "../../components/AddElementAndSearch.tsx";
 
+
 export const LocalEmails = observer(() => {
   useEffect(()=>{
     localEmailsState.LoadAllLocalEmails().catch(()=>console.log("Error"));
   },[]);
-
+  console.log(window.innerHeight-231);
   return(
 
       <div className='relative flex w-full h-full'>
@@ -20,6 +21,7 @@ export const LocalEmails = observer(() => {
           dataSource={localEmailsState.LocalEmailsFound}
           columns={localEmailsColumns}
           rowKey={(record)=>record.id}
+          scroll={{ y: window.innerHeight-300 }}
         />
         <AddElementAndSearch/>
       </div>

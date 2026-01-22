@@ -15,11 +15,13 @@ export const ForeignEmails = observer(() => {
     <div className='relative flex w-full h-full'>
       <Table
         loading={foreignEmailsState.loading}
-        size="small"
+        size="middle"
         className='w-full'
         dataSource={foreignEmailsState.foreignEmailFound}
         columns={foreignEmailsColumns}
         rowKey={(record)=>record.id}
+        pagination={false}
+        scroll={{ y: window.innerHeight-300 }}
       />
       <AddElementAndSearch
         showAddElement={false}

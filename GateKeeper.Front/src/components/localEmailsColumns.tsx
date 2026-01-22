@@ -37,7 +37,9 @@ export const localEmailsColumns:TableProps<LocalEmail>['columns'] = [
     width: '10%',
     render: (_, record) => (
       <TableCheckbox id={record.id} checked={record.isReplyAllowed}/>
-    )
+    ),
+    filters:[{text: 'Разрешен', value: true},{text: 'Запрещен', value: false}],
+    onFilter: (value, record) =>  record.isReplyAllowed === value
   },
   {
     title: 'Действия',

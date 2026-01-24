@@ -71,6 +71,8 @@ namespace GateKeeper.Core.Context
                 entity.Property(e=>e.Enabled).IsRequired().HasDefaultValue(true);
                 entity.Property(e=>e.Hash).IsRequired().UseCollation("BINARY");
                 entity.Property(e=>e.FullName).IsRequired();
+                entity.Property(e => e.TokenVersion).IsRequired().HasDefaultValue(Int32.MinValue);
+                entity.Property(e => e.IsAdmin).IsRequired().HasDefaultValue(false);
             });
             base.OnModelCreating(modelBuilder);
         }

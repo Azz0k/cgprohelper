@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GateKeeper.Core.Models.ApiModels;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,6 +14,15 @@ namespace GateKeeper.Core.Utils
             string pattern = @"^(([a-z0-9\-]+)|\*)(\.(([a-z0-9\-]+)|\*))*$";
             var match = Regex.Match(domain, pattern,RegexOptions.IgnoreCase);
             return match.Success;
+        }
+        public static bool isAddUserRequestValid(AddUserRequest request)
+        {
+            return true;
+        }
+        public static bool isUpdateUserRequestValid(UpdateUserRequest request)
+        {
+            if (request.Id<=0) return false;
+            return true;
         }
         public static string GenerateReceivedDate()
         {

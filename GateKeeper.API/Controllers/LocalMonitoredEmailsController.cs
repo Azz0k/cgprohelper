@@ -1,6 +1,7 @@
 ﻿using GateKeeper.Core.Application;
 using GateKeeper.Core.Models.ApiModels;
 using GateKeeper.Core.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -8,6 +9,7 @@ using System.Net;
 
 namespace GateKeeper.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LocalMonitoredEmailsController : ControllerBase
@@ -30,9 +32,9 @@ namespace GateKeeper.API.Controllers
             return await app.AddAsync(value);
         }
 
-        // PUT api/<LocalMonitoredEmailsController>/5
+        // PUT api/<LocalMonitoredEmailsController>
         [HttpPut]
-        public async Task<StatusCodeResult> Put(int id, [FromBody] UpdateLocalMonitoredEmailsRequest value)
+        public async Task<StatusCodeResult> Put([FromBody] UpdateLocalMonitoredEmailsRequest value)
         {
             int code = await app.UpdateAsync(value);
             return StatusCode(code);

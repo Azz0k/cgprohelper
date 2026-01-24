@@ -23,16 +23,17 @@ using Xunit.Abstractions;
 using static GateKeeper.Core.Utils.Utils;
 using static System.Net.Mime.MediaTypeNames;
 
+
 namespace GateKeeper.Tests
 {
-    public class LocalMonitoredEmailsAPITests :
+    public class UserApiTests :
         IClassFixture<CustomWebApplicationFactory<APIProgram>>
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly HttpClient _client;
         private readonly CustomWebApplicationFactory<APIProgram> _factory;
-        private string apiUri = "/api/LocalMonitoredEmails";
-        public LocalMonitoredEmailsAPITests(
+        private string apiUri = "/api/Users";
+        public UserApiTests(
             CustomWebApplicationFactory<APIProgram> factory, ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
@@ -52,56 +53,55 @@ namespace GateKeeper.Tests
                 db.Database.Migrate();
             }
         }
-        private string GenerateRandomDomainName()
+        private string GenerateRandomStr()
         {
             return Guid.NewGuid().ToString();
         }
-        private async Task<string?> PostToLocalMonitoredEmailsAPI(bool allowed=false)
+        private async Task<string?> PostToUsersAPI(AddUserRequest addUserRequest)
         {
-            string domain = GenerateRandomDomainName();
-            LocalMonitoredEmails request = new() { Email = $"test@{domain}", IsReplyAllowed = allowed};
+            return await PostToUsersAPI(addUserRequest.UserName, addUserRequest.FullName, addUserRequest.Password, addUserRequest.IsAdmin, addUserRequest.Enabled);
+        }
+        private async Task<string?> PostToUsersAPI(string userName, string fullName, string password, bool isAdmin, bool isEnabled)
+        {
+            AddUserRequest request = new() { UserName = userName, FullName = fullName, IsAdmin = isAdmin, Enabled = isEnabled, Password = password};
             var response = await _client.PostAsJsonAsync(apiUri, request);
             response.EnsureSuccessStatusCode();
             string? addedData = await response.Content.ReadAsStringAsync();
             return addedData;
         }
-        private async Task<List<LocalMonitoredEmailsDTO>?> GetAsync()
+        private async Task<List<UserDTO>?> GetAsync()
         {
             var response = await _client.GetAsync(apiUri);
-            var content = await response.Content.ReadFromJsonAsync<List<LocalMonitoredEmailsDTO>>();
+            var content = await response.Content.ReadFromJsonAsync<List<UserDTO>>();
             return content;
         }
         [Fact]
-        public async Task LocalMonitoredEmailsApi_POST_ShouldWorkCorrectly()
+        public async Task UsersApi_POST_ShouldWorkCorrectly()
         {
-            string? createdId = await PostToLocalMonitoredEmailsAPI();
+            string? createdId = await PostToUsersAPI(GenerateRandomStr(), GenerateRandomStr(), GenerateRandomStr(),true, true);
             Assert.NotNull(createdId);
             Assert.NotEmpty(createdId);
         }
         [Fact]
-        public async Task LocalMonitoredEmailsApi_GET_ShouldWorkCorrectly()
+        public async Task UsersApi_GET_ShouldWorkCorrectly()
         {
-            string? postResponceContent = await PostToLocalMonitoredEmailsAPI();
-            Assert.NotNull(postResponceContent);
-            int notAllowedID = int.Parse(postResponceContent);
-            postResponceContent = await PostToLocalMonitoredEmailsAPI(true);
-            Assert.NotNull(postResponceContent);
-            int allowedID = int.Parse(postResponceContent);
-            List<LocalMonitoredEmailsDTO>? getResponceContent = await GetAsync();
-            Assert.NotNull(getResponceContent);
-            Assert.NotEmpty(getResponceContent);
-            Assert.Contains(getResponceContent, e=> e.Id == notAllowedID);
-            Assert.True(getResponceContent.Where(e => e.Id == allowedID).All(e=>e.IsReplyAllowed));
-            Assert.Contains(getResponceContent, e => e.Id == allowedID);
-            Assert.True(getResponceContent.Where(e => e.Id == notAllowedID).All(e => !e.IsReplyAllowed));
+            AddUserRequest request = new() { FullName = GenerateRandomStr(), UserName = GenerateRandomStr(), Password = GenerateRandomStr(), IsAdmin = true, Enabled = true };
+            string? response = await PostToUsersAPI(request);
+            Assert.NotNull(response);
+            int id = Int32.Parse(response);
+            List<UserDTO>? getResponse = await GetAsync();
+            Assert.NotNull(getResponse);
+            Assert.NotEmpty(getResponse);
+            Assert.Contains(getResponse, e => e.Id == id);
         }
         [Fact]
-        public async Task LocalMonitoredEmailsApi_DELETE_ShouldWorkCorrectly()
+        public async Task UsersEmailsApi_DELETE_ShouldWorkCorrectly()
         {
-            string? createdId = await PostToLocalMonitoredEmailsAPI();
-            List<LocalMonitoredEmailsDTO>? res = await GetAsync();
+            AddUserRequest request = new() { FullName = GenerateRandomStr(), UserName = GenerateRandomStr(), Password = GenerateRandomStr(), IsAdmin = true, Enabled = true };
+            string? createdId = await PostToUsersAPI(request);
+            List<UserDTO>? res = await GetAsync();
             Assert.NotNull(res);
-            int idToDelete = res[0].Id;
+            int idToDelete = res[0].Id; 
             var response = await _client.DeleteAsync($"{apiUri}/{idToDelete}");
             response.EnsureSuccessStatusCode();
             response = await _client.DeleteAsync($"{apiUri}/{idToDelete}");
@@ -114,25 +114,25 @@ namespace GateKeeper.Tests
         [Fact]
         public async Task LocalMonitoredEmailsApi_PUT_ShouldWorkCorrectly()
         {
-            await PostToLocalMonitoredEmailsAPI();
-            await PostToLocalMonitoredEmailsAPI();
-            List<LocalMonitoredEmailsDTO>? emails = await GetAsync();
-            Assert.NotNull(emails);
-            var updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = emails[0].Id, Email = "update@update.ru" };
+            await PostToUsersAPI(GenerateRandomStr(), GenerateRandomStr(), GenerateRandomStr(), true,true);
+            await PostToUsersAPI(GenerateRandomStr(), GenerateRandomStr(), GenerateRandomStr(), true, true);
+            List<UserDTO>? users = await GetAsync();
+            Assert.NotNull(users);
+            var updateRequest = new UpdateUserRequest() { Id = users[0].Id, UserName = "Test", FullName = "Test", Enabled = false, IsAdmin =false};
             var response = await _client.PutAsJsonAsync(apiUri, updateRequest);
             response.EnsureSuccessStatusCode();
-            emails = await GetAsync();
-            Assert.NotNull(emails);
-            Assert.Contains<LocalMonitoredEmailsDTO>(emails, (LocalMonitoredEmailsDTO e) => e.Email == updateRequest.Email);
-            updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = emails.Last().Id, Email = "update@update.ru" };
+            users = await GetAsync();
+            Assert.NotNull(users);
+            Assert.Contains<UserDTO>(users, (UserDTO u) => u.UserName == updateRequest.UserName);
+            updateRequest = new UpdateUserRequest() { Id = users.Last().Id, UserName = "Test", FullName = "Test", Enabled = false, IsAdmin = false };
             response = await _client.PutAsJsonAsync(apiUri, updateRequest);
             var code = response.StatusCode;
             Assert.Equal(HttpStatusCode.BadRequest, code);
-            updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = -1, Email = "update1@update.ru" };
+            updateRequest = new UpdateUserRequest() { Id = -1, UserName = "Test", FullName = "Test", Enabled = false, IsAdmin = false };
             response = await _client.PutAsJsonAsync(apiUri, updateRequest);
             code = response.StatusCode;
             Assert.Equal(HttpStatusCode.BadRequest, code);
-            updateRequest = new UpdateLocalMonitoredEmailsRequest() { Id = int.MaxValue, Email = "update1@update.ru" };
+            updateRequest = new UpdateUserRequest() { Id = Int32.MaxValue, UserName = "Test", FullName = "Test", Enabled = false, IsAdmin = false };
             response = await _client.PutAsJsonAsync(apiUri, updateRequest);
             code = response.StatusCode;
             Assert.Equal(HttpStatusCode.NotFound, code);

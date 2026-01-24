@@ -4,6 +4,7 @@ using GateKeeper.Core.Models.ApiModels;
 using GateKeeper.Core.Models.Entities;
 using GateKeeper.Core.Services;
 using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace GateKeeper.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AllowedDomainsController : ControllerBase

@@ -1,8 +1,14 @@
+using GateKeeper.API.Models;
 using GateKeeper.Core.Application;
 using GateKeeper.Core.Context;
 using GateKeeper.Core.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Threading.Tasks;
 
 
@@ -17,6 +23,7 @@ namespace GateKeeper.API
             IConfiguration config = settignsBuilder.Build();
             string? allowedOrigins = config.GetSection("AllowedOrigins").Get<string>();
             string? connectionString = config.GetSection("ConnectionString").Get<string>()??defaultConnectionString;
+            string secretCode = config.GetSection("JWTSecretCode").Get<string>() ?? Guid.NewGuid().ToString();
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -32,6 +39,23 @@ namespace GateKeeper.API
             builder.Services.AddScoped<AllowedDomainsApplication>();
             builder.Services.AddScoped<ForeingEmailsApplication>();
             builder.Services.AddScoped<LocalMonitoredEmailsApplication>();
+            builder.Services.AddScoped<UserApplication>();
+            builder.Services.AddScoped<UserAuthenticationApplication>();
+            builder.Services.Configure<ApiSettings>(opt=>opt.JwtSecretCode = secretCode);
+            builder.Services.AddScoped<ApiSettings>();
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretCode)),
+                        ValidateIssuerSigningKey = true,
+                    };
+                });
             if (allowedOrigins != null)
             {
                 builder.Services.AddCors(options =>
@@ -58,7 +82,8 @@ namespace GateKeeper.API
             {
                 app.UseCors("FrontEnd");
             }
-                app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
 
             app.MapControllers();

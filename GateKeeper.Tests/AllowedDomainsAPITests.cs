@@ -1,4 +1,5 @@
 ﻿using GateKeeper.API;
+using GateKeeper.Core.Application;
 using GateKeeper.Core.Context;
 using GateKeeper.Core.Models.ApiModels;
 using GateKeeper.Core.Services;
@@ -30,6 +31,7 @@ namespace GateKeeper.Tests
         private readonly CustomWebApplicationFactory<APIProgram>
             _factory;
         private string apiUri = "/api/AllowedDomains";
+        private string token = "";
 
         public AllowedDomainsAPITests(
             CustomWebApplicationFactory<APIProgram> factory, ITestOutputHelper testOutputHelper)
@@ -49,6 +51,9 @@ namespace GateKeeper.Tests
                 var scopedServices = scope.ServiceProvider;
                 var db = scopedServices.GetRequiredService<AddressesDbContext>();
                 db.Database.Migrate();
+                var authApp = scopedServices.GetRequiredService<UserAuthenticationApplication>();
+                token = authApp.GenerateJwt(new Core.Models.Entities.User() { FullName ="test", UserName="test", Id = 1});
+                _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
             }
         }
         private async Task<List<AllowedDomainsDTO>?> GetAsync(string apiUri)

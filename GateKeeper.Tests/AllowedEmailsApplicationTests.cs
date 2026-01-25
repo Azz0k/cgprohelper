@@ -19,8 +19,6 @@ namespace GateKeeper.Tests
         AddressesDbContext db;
         public AllowedEmailsApplicationTests()
         {
-            ;
-
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<DbConnection>(container =>
                     {

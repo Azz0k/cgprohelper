@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Data.Common;
 using System.Net;
@@ -54,6 +55,9 @@ namespace GateKeeper.Tests
                 var scopedServices = scope.ServiceProvider;
                 var db = scopedServices.GetRequiredService<AddressesDbContext>();
                 db.Database.Migrate();
+                var authApp = scopedServices.GetRequiredService<UserAuthenticationApplication>();
+                string token = authApp.GenerateJwt(new Core.Models.Entities.User() { FullName = "test", UserName = "test", Id = 1 });
+                _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
             }
         }
         private async Task SeedDeprecatedDate()

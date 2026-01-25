@@ -34,7 +34,11 @@ namespace GateKeeper.Core.Application
             {
                 return null;
             }
-            var claims = new List<Claim> ();
+            return GenerateJwt(user);
+        }
+        internal string GenerateJwt(User user)
+        {
+            var claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
             claims.Add(new Claim(ClaimTypes.GivenName, user.FullName));

@@ -8,12 +8,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-
+[assembly: InternalsVisibleTo("GateKeeper.Tests")]
 namespace GateKeeper.API
 {
+    
     public class APIProgram
     {
         public static async Task Main(string[] args)

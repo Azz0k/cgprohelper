@@ -22,7 +22,7 @@ namespace GateKeeper.API.Controllers
             {
                 return Results.Unauthorized();
             }
-            return Results.Ok(res);
+            return Results.Ok(new { token = res });
         }
 
     }

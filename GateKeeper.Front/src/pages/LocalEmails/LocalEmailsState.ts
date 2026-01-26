@@ -2,6 +2,7 @@ import {makeObservable, observable, action, computed} from "mobx";
 import React from 'react';
 import {addLocalEmail, deleteLocalEmail, loadAllLocalEmails, updateLocalEmail} from "../../services/localEmails.api.ts";
 import {BasePageStore} from "../../store/BasePageStore.tsx";
+import {rootStore} from "../../store/RootStore.ts";
 
 export type LocalEmail = {
   id: number;
@@ -105,11 +106,11 @@ class LocalEmailsState extends BasePageStore{
     });
   }
 
-
   handleSaveClick = (email:string, isReplyAllowed:boolean) => {
     const newEmail:NewEmail = {email:email, isReplyAllowed:isReplyAllowed};
     this.AddLocalEmail(newEmail).then((result)=>{this.addPopoverOpened = !result});
   }
+
   async AddLocalEmail(newEmail:NewEmail){
     this.errorAddEntity = null;
     try {
@@ -129,6 +130,10 @@ class LocalEmailsState extends BasePageStore{
     catch(error:unknown){
       console.log(error);
       switch (error){
+        case 401:
+          this.localEmails = [];
+          rootStore.handleLogout();
+          break;
         default:
           this.errorAddEntity = 'Unknown error';
           break;
@@ -140,6 +145,16 @@ class LocalEmailsState extends BasePageStore{
     this.loading = true;
     try{
       this.localEmails = await loadAllLocalEmails() as LocalEmails;
+    }
+    catch(error:unknown){
+      switch (error){
+        case 401:
+          this.localEmails = [];
+          rootStore.handleLogout();
+          break;
+          default:
+            break;
+      }
     }
     finally{
       this.loading = false;
@@ -154,6 +169,10 @@ class LocalEmailsState extends BasePageStore{
     catch (error:unknown) {
       console.log(error);
       switch (error){
+        case 401:
+          this.localEmails = [];
+          rootStore.handleLogout();
+          break;
         case 400:
           this.errorEditEntity = 'Email already exists';
           break;
@@ -168,7 +187,13 @@ class LocalEmailsState extends BasePageStore{
   }
   async DeleteLocalEmail(id:number){
     try {
-      return await deleteLocalEmail(id)===204;
+      const code = await deleteLocalEmail(id);
+      if (code === 401){
+        this.localEmails = [];
+        rootStore.handleLogout();
+        return false;
+      }
+      return code===204;
     }
     catch  {
       return false;

@@ -3,11 +3,12 @@ import {LocalEmails} from "../pages/LocalEmails/LocalEmails.tsx";
 import {AllowedDomains} from "../pages/AllowedDomains/AllowedDomains.tsx";
 import {ForeignEmails} from "../pages/ForeignEmails/ForeignEmails.tsx";
 
+
 const rootRoute = createRootRoute();
 const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/',
-    component: ()=><LocalEmails/>,
+    component: ()=><LocalEmails />,
 
 });
 const foreignEmailsRoute = createRoute({

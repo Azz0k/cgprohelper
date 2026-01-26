@@ -1,15 +1,22 @@
-import {observer} from "mobx-react";
+import {observer } from "mobx-react";
+import { reaction } from "mobx";
 import {useEffect} from "react";
 import {localEmailsState} from "./LocalEmailsState.ts";
 import { Table } from 'antd';
 import {localEmailsColumns} from "../../components/localEmailsColumns.tsx";
 import {AddElementAndSearch} from "../../components/AddElementAndSearch.tsx";
-
+import {rootStore} from "../../store/RootStore.ts";
 
 export const LocalEmails = observer(() => {
+  reaction(
+    ()=>rootStore.isLoggedIn,
+    ()=>localEmailsState.LoadAllLocalEmails().then()
+  );
   useEffect(()=>{
-    localEmailsState.LoadAllLocalEmails().catch(()=>console.log("Error"));
+    localEmailsState.LoadAllLocalEmails().then();
   },[]);
+
+
   return(
 
       <div className='relative flex w-full h-full'>

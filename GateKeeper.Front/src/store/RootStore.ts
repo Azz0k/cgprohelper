@@ -8,18 +8,18 @@ import {foreignEmailsState} from "../pages/ForeignEmails/ForeignEmailsState.ts";
 import type {LoginPass} from "../interfaces/LoginPass.ts";
 import {Authenticate} from "../services/Authenticate.api.ts";
 
-
-
 class RootStore {
   globalMenuSelectedKey: string = "1";
   pathName!: string;
   token:string |null = null;
+  userName:string |null = null;
   constructor() {
     makeAutoObservable(this);
     Router.subscribe('onResolved', (evt)=>{
       this.pathName = evt.toLocation.pathname;
     });
-
+    this.token = localStorage.getItem("token");
+    this.userName = localStorage.getItem("userName");
     const pathname = Router.__store.state.location.pathname;
     const key = Object.keys(pathname).find(key => routes[key] === pathname);
     if(key)
@@ -30,6 +30,12 @@ class RootStore {
   get isLoggedIn(): boolean {
     return this.token !== null;
   }
+  handleLogout = ()=>  {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userName");
+    this.token = null;
+    this.userName = null;
+  }
   handleFinishLoginForm =(values:LoginPass)=>{
     this.Authenticate(values).then();
   }
@@ -39,6 +45,9 @@ class RootStore {
       const token=result.token;
       if(token){
         this.token = token;
+        this.userName = values.Login;
+        localStorage.setItem("token", token);
+        localStorage.setItem("userName", values.Login);
       }
     }
     catch(error:unknown){

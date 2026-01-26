@@ -7,7 +7,7 @@ import {
   loadAllAllowedDomains,
   updateAllowedDomain
 } from "../../services/allowedDomains.api.ts";
-
+import {rootStore} from "../../store/RootStore.ts";
 
 export type AllowedDomain = {
   id: number;
@@ -124,6 +124,10 @@ class AllowedDomainState extends BasePageStore{
     catch(error:unknown){
       console.log(error);
       switch (error){
+        case 401:
+          this.allowedDomains = [];
+          rootStore.handleLogout();
+          break;
         default:
           this.errorAddEntity = 'Unknown error';
           break;
@@ -135,6 +139,16 @@ class AllowedDomainState extends BasePageStore{
     this.loading = true;
     try{
       this.allowedDomains = await loadAllAllowedDomains() as AllowedDomains;
+    }
+    catch (error:unknown){
+      switch (error){
+        case 401:
+          this.allowedDomains = [];
+          rootStore.handleLogout();
+          break;
+        default:
+          break;
+      }
     }
     finally{
       this.loading = false;
@@ -149,6 +163,10 @@ class AllowedDomainState extends BasePageStore{
     catch (error:unknown) {
       console.log(error);
       switch (error){
+        case 401:
+          this.allowedDomains = [];
+          rootStore.handleLogout();
+          break;
         case 400:
           this.errorEditEntity = 'Domain already exists or invalid';
           break;
@@ -163,7 +181,13 @@ class AllowedDomainState extends BasePageStore{
   }
   async DeleteAllowedDomain(id:number){
     try {
-      return await deleteAllowedDomain(id)===204;
+      const code = await deleteAllowedDomain(id);
+      if (code === 401){
+        this.allowedDomains = [];
+        rootStore.handleLogout();
+        return false;
+      }
+      return code === 204;
     }
     catch  {
       return false;

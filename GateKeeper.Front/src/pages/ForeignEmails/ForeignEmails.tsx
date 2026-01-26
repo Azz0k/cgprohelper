@@ -5,10 +5,16 @@ import { Table } from 'antd';
 import {AddElementAndSearch} from "../../components/AddElementAndSearch.tsx";
 import {foreignEmailsState} from "./ForeignEmailsState.ts";
 import {foreignEmailsColumns} from "../../components/ForeignEmailsColumns.tsx";
+import {rootStore} from "../../store/RootStore.ts";
+import {reaction} from "mobx";
 
 export const ForeignEmails = observer(() => {
+  reaction(
+    ()=>rootStore.isLoggedIn,
+    ()=>foreignEmailsState.LoadAllForeignEmails().then()
+  );
   useEffect(()=>{
-    foreignEmailsState.LoadAllForeignEmails().catch(()=>console.log("Error"));
+    foreignEmailsState.LoadAllForeignEmails().then()
   },[]);
 
   return(

@@ -1,16 +1,11 @@
 import {queryClient} from "../main.tsx";
+import {AddData, DeleteData, FetchData, UpdateData} from "./DataService.api.ts";
 
 const allowedDomainsApiUrl = import.meta.env.VITE_ALLOWED_DOMAINS_API_URL;
+
 export const addAllowedDomain = async (body:string)=>{
-  const res = await fetch(allowedDomainsApiUrl, {
-    method: 'POST',
-    body: body,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+  const res = await AddData(allowedDomainsApiUrl, body);
   if (res.status !== 200) {
-    console.log(res);
     throw res.status;
   }
   return res.json();
@@ -18,27 +13,22 @@ export const addAllowedDomain = async (body:string)=>{
 export const loadAllAllowedDomains = async () => {
   return await queryClient.fetchQuery({
     queryKey: ["allowedDomains", "get"],
-    queryFn: () => fetch(allowedDomainsApiUrl).then(res => res.json()),
+    queryFn: () => FetchData(allowedDomainsApiUrl).then(res => {
+      if (res.status !== 200) {
+        throw res.status;
+      }
+      return res.json();
+    }),
     staleTime: 60_000,
   });
 };
 export const updateAllowedDomain = async (body:string)=>{
-  const res = await fetch(allowedDomainsApiUrl, {
-    method: 'PUT',
-    body: body,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+  const res = await UpdateData(allowedDomainsApiUrl, body);
   if (res.status !== 200) {
-    console.log(res);
     throw res.status;
   }
 };
 export const deleteAllowedDomain = async (id:number)=>{
-  const res = await fetch(`${allowedDomainsApiUrl}/${id}`, {
-    method: 'DELETE',
-  });
-  console.log(res.status);
+  const res = await DeleteData(`${allowedDomainsApiUrl}/${id}`);
   return res.status;
 }

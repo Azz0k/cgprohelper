@@ -4,10 +4,16 @@ import {allowedDomainState} from "./AllowedDomainState.ts";
 import { Table } from 'antd';
 import {AddElementAndSearch} from "../../components/AddElementAndSearch.tsx";
 import {allowedDomainsColumns} from "../../components/AllowedDomainsColumns.tsx";
+import {rootStore} from "../../store/RootStore.ts";
+import {reaction} from "mobx";
 
 export const AllowedDomains = observer(() => {
+  reaction(
+    ()=>rootStore.isLoggedIn,
+    ()=>allowedDomainState.LoadAllAllowedDomains().then()
+  )
   useEffect(()=>{
-    allowedDomainState.LoadAllAllowedDomains().catch(()=>console.log("Error"));
+    allowedDomainState.LoadAllAllowedDomains().then();
   },[]);
 
   return(

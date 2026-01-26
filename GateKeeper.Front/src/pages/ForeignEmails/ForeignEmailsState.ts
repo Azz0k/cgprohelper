@@ -1,6 +1,7 @@
 import {BasePageStore} from "../../store/BasePageStore.tsx";
 import {computed, makeObservable, action, observable} from "mobx";
 import {deleteForeignEmail, loadAllForeignEmails} from "../../services/foreignEmails.api.ts";
+import {rootStore} from "../../store/RootStore.ts";
 
 
 export type ForeignEmail = {
@@ -57,13 +58,29 @@ class ForeignEmailsState  extends  BasePageStore{
     try{
       this.foreignEmails = await loadAllForeignEmails() as ForeignEmails;
     }
+    catch (error:unknown) {
+      switch (error){
+        case 401:
+          this.foreignEmails = [];
+          rootStore.handleLogout();
+          break;
+          default:
+            break;
+      }
+    }
     finally{
       this.loading = false;
     }
   }
   async DeleteForeignEmail(id:number){
     try {
-      return await deleteForeignEmail(id)===204;
+      const code = await deleteForeignEmail(id);
+      if (code === 401){
+        this.foreignEmails = [];
+        rootStore.handleLogout();
+        return false;
+      }
+      return code === 204;
     }
     catch  {
       return false;

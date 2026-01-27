@@ -98,7 +98,7 @@ namespace GateKeeper.Tests
             Assert.Contains(getResponse, e => e.Id == id);
         }
         [Fact]
-        public async Task UsersEmailsApi_DELETE_ShouldWorkCorrectly()
+        public async Task UsersApi_DELETE_ShouldWorkCorrectly()
         {
             AddUserRequest request = new() { FullName = GenerateRandomStr(), UserName = GenerateRandomStr(), Password = GenerateRandomStr(), IsAdmin = true, Enabled = true };
             string? createdId = await PostToUsersAPI(request);
@@ -115,7 +115,7 @@ namespace GateKeeper.Tests
             Assert.DoesNotContain(domainsAfterDelete, e => e.Id == idToDelete);
         }
         [Fact]
-        public async Task LocalMonitoredEmailsApi_PUT_ShouldWorkCorrectly()
+        public async Task UsersApi_PUT_ShouldWorkCorrectly()
         {
             await PostToUsersAPI(GenerateRandomStr(), GenerateRandomStr(), GenerateRandomStr(), true,true);
             await PostToUsersAPI(GenerateRandomStr(), GenerateRandomStr(), GenerateRandomStr(), true, true);

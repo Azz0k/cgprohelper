@@ -42,6 +42,8 @@ namespace GateKeeper.Core.Application
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
             claims.Add(new Claim(ClaimTypes.GivenName, user.FullName));
+            if (user.IsAdmin)
+                claims.Add(new Claim("IsAdmin", "true"));
             var jwt = new JwtSecurityToken(
                 claims: claims,
                 expires: DateTime.Now.AddDays(30),

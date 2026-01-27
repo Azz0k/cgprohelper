@@ -45,7 +45,9 @@ namespace GateKeeper.API
             builder.Services.AddScoped<UserAuthenticationApplication>();
             builder.Services.Configure<ApiSettings>(opt=>opt.JwtSecretCode = secretCode);
             builder.Services.AddScoped<ApiSettings>();
-            builder.Services.AddAuthorization();
+            //builder.Services.AddAuthorization();
+            builder.Services.AddAuthorizationBuilder()
+                .AddPolicy("AdminOnly", policy => policy.RequireClaim("IsAdmin"));
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {

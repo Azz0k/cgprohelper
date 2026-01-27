@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GateKeeper.API.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase

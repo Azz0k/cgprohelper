@@ -1,7 +1,8 @@
-import { ClusterOutlined } from "@ant-design/icons";
+import {ClusterOutlined, UserOutlined} from "@ant-design/icons";
+import type {MenuItemType} from "antd/es/menu/interface";
 
 
-export const GlobalMenu = [
+export const GlobalMenu:MenuItemType[] = [
   {
     key: '1', icon: <ClusterOutlined />, label: 'Локальные адреса',
   },
@@ -10,6 +11,10 @@ export const GlobalMenu = [
   },
   {
     key: '3', icon: <ClusterOutlined />, label: 'Разрешенные домены',
+  },
+  {
+    key: '4', icon: <UserOutlined />,
+    label: 'Пользователи',
   },
 ];
 

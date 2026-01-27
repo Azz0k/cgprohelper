@@ -3,6 +3,7 @@ import {GlobalMenu} from "../constants/GlobalMenu.tsx";
 import { observer } from "mobx-react";
 import {rootStore} from "../store/RootStore.ts";
 
+
 export const Sidebar = observer(()=>{
   const style = {
     display: "flex",
@@ -12,7 +13,11 @@ export const Sidebar = observer(()=>{
     color: "#fff",
   }
   const { Sider } = Layout;
-
+  GlobalMenu.forEach(e=>{
+    if (e?.key == "4"){
+      e.disabled = !rootStore.isAdmin;
+    }
+  });
   return (
     <Sider style={style} width={250}>
       <div className="flex flex-col justify-between h-full">

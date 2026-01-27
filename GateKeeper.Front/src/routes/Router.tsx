@@ -21,6 +21,11 @@ const allowedDomainsRoute = createRoute({
     path: '/alloweddomains',
     component: () => <AllowedDomains/>,
 });
-const routeTree = rootRoute.addChildren([indexRoute, foreignEmailsRoute, allowedDomainsRoute]);
+const usersRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/users',
+    component: () => <div> Users</div>,
+});
+const routeTree = rootRoute.addChildren([indexRoute, foreignEmailsRoute, allowedDomainsRoute,usersRoute]);
 const Router = createRouter({ routeTree });
 export { Router }

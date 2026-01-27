@@ -30,6 +30,12 @@ class RootStore {
   get isLoggedIn(): boolean {
     return this.token !== null;
   }
+  get isAdmin(): boolean {
+    if (this.token == null) return false;
+    const tokenParts = this.token.split('.');
+    if (tokenParts.length < 2) return false;
+    return atob(tokenParts[1]).includes('IsAdmin');
+  }
   handleLogout = ()=>  {
     localStorage.removeItem("token");
     localStorage.removeItem("userName");

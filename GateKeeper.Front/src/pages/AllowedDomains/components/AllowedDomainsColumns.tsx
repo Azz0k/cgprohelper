@@ -1,9 +1,9 @@
 import type { TableProps } from 'antd';
 import { Input } from 'antd';
 import {Observer} from "mobx-react";
-import {allowedDomainState} from "../pages/AllowedDomains/AllowedDomainState.ts";
-import type { AllowedDomain } from "../pages/AllowedDomains/AllowedDomainState.ts"
-import {TableActions} from "./TableActions.tsx";
+import {allowedDomainState} from "../AllowedDomainState.ts";
+import type { AllowedDomain } from "../AllowedDomainState.ts"
+import {TableActions} from "../../../components/TableActions.tsx";
 
 
 export const allowedDomainsColumns:TableProps<AllowedDomain>['columns'] = [

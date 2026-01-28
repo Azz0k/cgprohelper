@@ -1,10 +1,10 @@
 import type { TableProps } from 'antd';
 import { Input } from 'antd';
 import {Observer} from "mobx-react";
-import {localEmailsState} from "../pages/LocalEmails/LocalEmailsState.ts";
-import type { LocalEmail } from "../pages/LocalEmails/LocalEmailsState.ts"
-import {TableActions} from "./TableActions.tsx";
-import {TableCheckbox} from "./TableCheckbox.tsx";
+import {localEmailsState} from "../LocalEmailsState.ts";
+import type { LocalEmail } from "../LocalEmailsState.ts"
+import {TableActions} from "../../../components/TableActions.tsx";
+import {IsReplyAllowedTableCheckbox} from "./IsReplyAllowedTableCheckbox.tsx";
 
 export const localEmailsColumns:TableProps<LocalEmail>['columns'] = [
   {
@@ -36,7 +36,7 @@ export const localEmailsColumns:TableProps<LocalEmail>['columns'] = [
     key: 'isReplyAllowed',
     width: '10%',
     render: (_, record) => (
-      <TableCheckbox id={record.id} checked={record.isReplyAllowed}/>
+      <IsReplyAllowedTableCheckbox id={record.id} checked={record.isReplyAllowed}/>
     ),
     filters:[{text: 'Разрешен', value: true},{text: 'Запрещен', value: false}],
     onFilter: (value, record) =>  record.isReplyAllowed === value

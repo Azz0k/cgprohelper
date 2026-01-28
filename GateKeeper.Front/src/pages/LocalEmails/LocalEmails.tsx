@@ -3,7 +3,7 @@ import { reaction } from "mobx";
 import {useEffect} from "react";
 import {localEmailsState} from "./LocalEmailsState.ts";
 import { Table } from 'antd';
-import {localEmailsColumns} from "../../components/localEmailsColumns.tsx";
+import {localEmailsColumns} from "./components/localEmailsColumns.tsx";
 import {AddElementAndSearch} from "../../components/AddElementAndSearch.tsx";
 import {rootStore} from "../../store/RootStore.ts";
 

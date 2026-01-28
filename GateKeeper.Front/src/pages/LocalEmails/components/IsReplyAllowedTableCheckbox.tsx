@@ -1,8 +1,8 @@
 import {observer} from "mobx-react";
-import {localEmailsState} from "../pages/LocalEmails/LocalEmailsState.ts";
+import {localEmailsState} from "../LocalEmailsState.ts";
 import {Checkbox} from "antd";
 
-export const TableCheckbox = observer(({id, checked})=>{
+export const IsReplyAllowedTableCheckbox = observer(({id, checked})=>{
   return (
     <Checkbox
       disabled={id!=localEmailsState.editingId}

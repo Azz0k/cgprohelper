@@ -1,6 +1,6 @@
 import {observer} from "mobx-react";
 import {Button, Checkbox, Input, Space} from "antd";
-import {localEmailsState} from "../pages/LocalEmails/LocalEmailsState.ts";
+import {localEmailsState} from "../LocalEmailsState.ts";
 import {useState} from "react";
 
 export const AddLocalEmailContent = observer(({inputRef})=>{

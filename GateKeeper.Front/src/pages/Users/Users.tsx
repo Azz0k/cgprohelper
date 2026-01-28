@@ -1,30 +1,31 @@
-import {observer} from "mobx-react";
+import {observer } from "mobx-react";
+import { reaction } from "mobx";
 import {useEffect} from "react";
-import {allowedDomainState} from "./AllowedDomainState.ts";
 import { Table } from 'antd';
 import {AddElementAndSearch} from "../../components/AddElementAndSearch.tsx";
-import {allowedDomainsColumns} from "./components/AllowedDomainsColumns.tsx";
 import {rootStore} from "../../store/RootStore.ts";
-import {reaction} from "mobx";
+import {usersState} from "./UsersState.ts";
+import {usersColumns} from "./components/usersColumns.tsx";
 
-export const AllowedDomains = observer(() => {
+export const Users = observer(() => {
   reaction(
     ()=>rootStore.isLoggedIn,
-    ()=>allowedDomainState.LoadAllAllowedDomains().then()
-  )
+    ()=>usersState.LoadAllUsers().then()
+  );
   useEffect(()=>{
-    allowedDomainState.LoadAllAllowedDomains().then();
+    usersState.LoadAllUsers().then()
   },[]);
+
 
   return(
 
     <div className='relative flex w-full h-full'>
       <Table
-        loading={allowedDomainState.loading}
+        loading={usersState.loading}
         size="small"
         className='w-full'
-        dataSource={allowedDomainState.AllowedDomainFound}
-        columns={allowedDomainsColumns}
+        dataSource={usersState.UsersFound}
+        columns={usersColumns}
         rowKey={(record)=>record.id}
         scroll={{ y: window.innerHeight-300 }}
       />

@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter } from '@tanstack/react-rout
 import {LocalEmails} from "../pages/LocalEmails/LocalEmails.tsx";
 import {AllowedDomains} from "../pages/AllowedDomains/AllowedDomains.tsx";
 import {ForeignEmails} from "../pages/ForeignEmails/ForeignEmails.tsx";
+import {Users} from "../pages/Users/Users.tsx";
 
 
 const rootRoute = createRootRoute();
@@ -24,7 +25,7 @@ const allowedDomainsRoute = createRoute({
 const usersRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/users',
-    component: () => <div> Users</div>,
+    component: () => <Users/>,
 });
 const routeTree = rootRoute.addChildren([indexRoute, foreignEmailsRoute, allowedDomainsRoute,usersRoute]);
 const Router = createRouter({ routeTree });

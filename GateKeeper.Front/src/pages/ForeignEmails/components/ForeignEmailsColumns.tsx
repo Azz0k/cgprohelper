@@ -1,6 +1,6 @@
 import type { TableProps } from 'antd';
-import type {ForeignEmail} from "../pages/ForeignEmails/ForeignEmailsState.ts";
-import {TableActions} from "./TableActions.tsx";
+import type {ForeignEmail} from "../ForeignEmailsState.ts";
+import {TableActions} from "../../../components/TableActions.tsx";
 
 
 export const foreignEmailsColumns:TableProps<ForeignEmail>['columns'] = [

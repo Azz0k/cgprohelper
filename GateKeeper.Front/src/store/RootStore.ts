@@ -7,6 +7,7 @@ import type {LocalState} from "../interfaces/LocalState.ts";
 import {foreignEmailsState} from "../pages/ForeignEmails/ForeignEmailsState.ts";
 import type {LoginPass} from "../interfaces/LoginPass.ts";
 import {Authenticate} from "../services/Authenticate.api.ts";
+import {usersState} from "../pages/Users/UsersState.ts";
 
 class RootStore {
   globalMenuSelectedKey: string = "1";
@@ -76,6 +77,8 @@ class RootStore {
         return localEmailsState;
       case '/alloweddomains':
         return allowedDomainState;
+      case '/users':
+        return usersState;
       default:
         return foreignEmailsState;
     }

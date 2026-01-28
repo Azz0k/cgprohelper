@@ -1,10 +1,11 @@
 import {observer} from "mobx-react";
 import {type InputRef, Popover, Space} from "antd";
-import {AddLocalEmailContent} from "./AddLocalEmailContent.tsx";
+import {AddLocalEmailContent} from "../pages/LocalEmails/components/AddLocalEmailContent.tsx";
 import Search from "antd/es/input/Search";
 import {rootStore} from "../store/RootStore.ts";
-import {AddAllowedDomainContent} from "./AddAllowedDomainContent.tsx";
+import {AddAllowedDomainContent} from "../pages/AllowedDomains/components/AddAllowedDomainContent.tsx";
 import {type RefObject, useRef} from "react";
+import {AddUsersContent} from "../pages/Users/components/AddUsersContent.tsx";
 
 
 export const AddElementAndSearch = observer(({showAddElement = true, showSearchElement =true})=>{
@@ -14,6 +15,9 @@ export const AddElementAndSearch = observer(({showAddElement = true, showSearchE
     case "/":
       content = <AddLocalEmailContent inputRef={inputRef} />;
     break;
+    case "/users":
+      content = <AddUsersContent inputRef={inputRef} />;
+      break;
     default:
     content = <AddAllowedDomainContent inputRef={inputRef} />;
     break;

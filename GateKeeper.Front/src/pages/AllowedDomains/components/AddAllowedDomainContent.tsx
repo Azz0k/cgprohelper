@@ -1,7 +1,7 @@
 import {observer} from "mobx-react";
 import {Button, Input, Space} from "antd";
 import {useState} from "react";
-import {allowedDomainState} from "../pages/AllowedDomains/AllowedDomainState.ts";
+import {allowedDomainState} from "../AllowedDomainState.ts";
 
 export const AddAllowedDomainContent = observer(({inputRef})=>{
   const [domain, setDomain] = useState('');

@@ -28,6 +28,7 @@ class UsersState extends BasePageStore {
     super();
     makeObservable(this, {
       ChangePasswordPopoverOpened:observable,
+      changePasswordId: observable,
       users: observable,
       originalUser: observable,
       loading: observable,
@@ -58,6 +59,7 @@ class UsersState extends BasePageStore {
       DeleteUser: action,
       handleChangePassword: action,
       handleChangePasswordCancel: action,
+      handlePasswordSaveClick: action,
     });
   }
   get UsersFound(){
@@ -93,6 +95,14 @@ class UsersState extends BasePageStore {
     this.UpdateUser(this.editingId).then(()=>{
       if (this.errorEditEntity === null) {
         this.editingId = -1
+      }
+    });
+  }
+  handlePasswordSaveClick = (id:number, userName: string, fullName:string, password:string, enabled: boolean, isAdmin:boolean) => {
+    const newUser:NewUser = {userName, fullName, password, enabled, isAdmin};
+    this.UpdateUser(id, newUser).then(()=>{
+      if (this.errorEditEntity === null) {
+        this.handleChangePasswordCancel();
       }
     });
   }
@@ -194,10 +204,15 @@ class UsersState extends BasePageStore {
       this.loading = false;
     }
   }
-  async UpdateUser(id:number) {
+  async UpdateUser(id:number, user:NewUser |null = null) {
     this.errorEditEntity = null;
     try{
-      const body = JSON.stringify(this.users.find(value => value.id === id));
+      let body: string;
+      if (user === null) {
+        body = JSON.stringify(this.users.find(value => value.id === id));
+      }
+      else
+        body = JSON.stringify({...user, id});
       await updateUser(body);
     }
     catch (error:unknown) {
@@ -209,7 +224,7 @@ class UsersState extends BasePageStore {
           rootStore.handleLogout();
           break;
         case 400:
-          this.errorEditEntity = 'User already exists';
+          this.errorEditEntity = 'User data is invalid';
           break;
         case 404:
           this.errorEditEntity = 'Not Found. Please update this page.';

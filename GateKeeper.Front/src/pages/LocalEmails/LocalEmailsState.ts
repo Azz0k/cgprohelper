@@ -58,6 +58,7 @@ class LocalEmailsState extends BasePageStore{
   }
 
   handleEditClick = (id:number) => {
+    if (this.showDeleteDialogId>-1) return;
     this.editingId = id;
     const element = this.localEmails.find(value => value.id === id);
     if (element) {

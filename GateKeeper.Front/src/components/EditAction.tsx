@@ -4,6 +4,11 @@ import {rootStore} from "../store/RootStore.ts";
 
 export const EditAction = observer(({id})=>{
   return(
-    <a onClick={()=>rootStore.localState.handleEditClick(id)}>Edit</a>
+    <a
+      onClick={()=>rootStore.localState.handleEditClick(id)}
+
+    >
+      Edit
+    </a>
   );
 })

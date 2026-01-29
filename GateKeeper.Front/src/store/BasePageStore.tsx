@@ -12,7 +12,9 @@ export class BasePageStore{
     this.searchText=e.target.value;
   }
   handleDeleteClick = (id:number) => {
-    this.showDeleteDialogId = id;
+    if (this.editingId === -1) {
+      this.showDeleteDialogId = id;
+    }
   }
   handleNoClickAfterDeleteClick = () => {
     this.showDeleteDialogId = -1;

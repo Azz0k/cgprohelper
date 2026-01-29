@@ -69,6 +69,7 @@ class UsersState extends BasePageStore {
       return this.users;
   }
   handleChangePassword = (id:number) => {
+    if (this.editingId>-1 || this.showDeleteDialogId>-1) return;
     this.ChangePasswordPopoverOpened = true;
     this.changePasswordId = id;
   }
@@ -77,10 +78,16 @@ class UsersState extends BasePageStore {
     this.changePasswordId = null;
   }
   handleEditClick = (id:number) => {
+    if (this.showDeleteDialogId>-1 || this.changePasswordId!==null) return;
     this.editingId = id;
     const element = this.users.find(value => value.id === id);
     if (element) {
       this.originalUser = element;
+    }
+  }
+  handleDeleteClick = (id:number) => {
+    if (this.editingId === -1 && this.changePasswordId === null) {
+      this.showDeleteDialogId = id;
     }
   }
   handleCancelEditClick = () => {

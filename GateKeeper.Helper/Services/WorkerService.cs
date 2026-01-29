@@ -98,6 +98,8 @@ namespace CGPGK.Services
                 await app.UpdateDomainsFromFTPAsync(fullData);
                 PrintLogMessage("Domains definitions updated");
             }
+            var foreignApp = scope.ServiceProvider.GetRequiredService<ForeingEmailsApplication>();
+            await foreignApp.RemoveDeprecatedRecordsAsync();
         }
     }
 }

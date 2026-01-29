@@ -77,7 +77,7 @@ namespace GateKeeper.Tests
             {
                 var scopedServices = scope.ServiceProvider;
                 var app = scopedServices.GetRequiredService<ForeingEmailsApplication>();
-                await app.RemoveDeprecatedRecords();
+                await app.RemoveDeprecatedRecordsAsync();
             }
         }
         private async Task<List<ForeingEmailsDTO>?> GetAsync()

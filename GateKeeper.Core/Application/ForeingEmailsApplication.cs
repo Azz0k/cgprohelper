@@ -37,7 +37,7 @@ namespace GateKeeper.Core.Application
             List<ForeingEmails> list = await GetAllRecordsAsync<ForeingEmails>();
             foreach (ForeingEmails email in list)
             {
-                if (string.Compare(email.ReceivedDate,deprecatedDate)>=0)
+                if (string.Compare(email.ReceivedDate,deprecatedDate)<=0)
                 {
                     await dbservice.DeleteAsync<ForeingEmails>(email.Id)    ;
                 }

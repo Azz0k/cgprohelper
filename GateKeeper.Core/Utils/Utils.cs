@@ -30,7 +30,7 @@ namespace GateKeeper.Core.Utils
         }
         public static string GenerateDeprecatedDate()
         {
-            return DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd");
+            return DateTime.Now.AddDays(-8).ToString("yyyy-MM-dd");
         }
     }
 }

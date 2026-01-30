@@ -35,7 +35,8 @@ class RootStore {
     if (this.token == null) return false;
     const tokenParts = this.token.split('.');
     if (tokenParts.length < 2) return false;
-    return atob(tokenParts[1]).includes('IsAdmin');
+    const base64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
+    return atob(base64).includes('IsAdmin');
   }
   handleLogout = ()=>  {
     localStorage.removeItem("token");

@@ -1,5 +1,6 @@
 ﻿using CGPGK.Models;
 using GateKeeper.Core.Application;
+using GateKeeper.Core.Models.ApiModels;
 using GateKeeper.Helper.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using static CGPGK.Utils.Utils;
+using static GateKeeper.Core.Utils.Utils;
 
 namespace GateKeeper.Helper.Application
 {
@@ -16,12 +18,14 @@ namespace GateKeeper.Helper.Application
         private AllowedDomainsApplication allowedDomainsApplication;
         private ForeingEmailsApplication foreingEmailsApplication;
         private LocalMonitoredEmailsApplication localMonitoredEmailsApplication;
+        private BlockedEmailsApplication blockedEmailApplication;
         private readonly AppSettings appSettings;
         public HelperApplication(
             AllowedEmailsApplication emailsApplication,
             AllowedDomainsApplication domainsApplication,
             ForeingEmailsApplication foreingEmailsApplication,
             LocalMonitoredEmailsApplication localMonitoredEmailsApplication,
+            BlockedEmailsApplication blockedEmailApplication,
             AppSettings appSettings)
         {
             this.appSettings = appSettings;
@@ -29,6 +33,7 @@ namespace GateKeeper.Helper.Application
             this.allowedDomainsApplication = domainsApplication;
             this.foreingEmailsApplication = foreingEmailsApplication;
             this.localMonitoredEmailsApplication = localMonitoredEmailsApplication;
+            this.blockedEmailApplication = blockedEmailApplication;
         }
         public async Task UpdateEmailsFromFTPAsync( HashSet<string> data)
         {
@@ -127,6 +132,13 @@ namespace GateKeeper.Helper.Application
                     domain = recipient.Substring(recipient.IndexOf('@') + 1);
                     if (await allowedEmailsApplication.IsEmailExists(recipient)) continue;
                     if (await allowedDomainsApplication.IsDomainExists(domain)) continue;
+                    var request = new AddBlockedEmailRequest() {
+                        SenderEmail = emailFields.From, 
+                        RecipientEmail = recipient, 
+                        Date = GenerateReceivedDate(), 
+                        Time = GenerateReceivedTime()
+                    };
+                    await blockedEmailApplication.AddAsync(request);
                     return false;
                 }
                 return true;

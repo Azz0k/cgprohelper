@@ -3,6 +3,7 @@ import {LocalEmails} from "../pages/LocalEmails/LocalEmails.tsx";
 import {AllowedDomains} from "../pages/AllowedDomains/AllowedDomains.tsx";
 import {ForeignEmails} from "../pages/ForeignEmails/ForeignEmails.tsx";
 import {Users} from "../pages/Users/Users.tsx";
+import {BlockedEmails} from "../pages/BlockedEmails/BlockedEmails.tsx";
 
 
 const rootRoute = createRootRoute();
@@ -22,11 +23,22 @@ const allowedDomainsRoute = createRoute({
     path: '/alloweddomains',
     component: () => <AllowedDomains/>,
 });
+const blockedEmailsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/blockedemails',
+    component: () => <BlockedEmails/>,
+});
 const usersRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/users',
     component: () => <Users/>,
 });
-const routeTree = rootRoute.addChildren([indexRoute, foreignEmailsRoute, allowedDomainsRoute,usersRoute]);
+const routeTree = rootRoute.addChildren(
+  [ indexRoute,
+    foreignEmailsRoute,
+    allowedDomainsRoute,
+    blockedEmailsRoute,
+    usersRoute
+  ]);
 const Router = createRouter({ routeTree });
 export { Router }

@@ -13,6 +13,7 @@ namespace GateKeeper.Core.Context
         public DbSet<AllowedDomains> allowedDomains { get; set; }
         public DbSet<AllowedEmails> allowedEmails { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<BlockedEmails> blockedEmails { get; set; }
         private string fileName = "AddressDatabase.sqlite";
         public AddressesDbContext()
         {
@@ -73,6 +74,15 @@ namespace GateKeeper.Core.Context
                 entity.Property(e=>e.FullName).IsRequired();
                 entity.Property(e => e.TokenVersion).IsRequired().HasDefaultValue(Int32.MinValue);
                 entity.Property(e => e.IsAdmin).IsRequired().HasDefaultValue(false);
+            });
+            modelBuilder.Entity<BlockedEmails>(entity => 
+            {
+                entity.ToTable($"{nameof(BlockedEmails)}");
+                entity.HasKey(e => e.Id);
+                entity.Property(e=>e.SenderEmail).IsRequired();
+                entity.Property(e=>e.RecipientEmail).IsRequired();
+                entity.Property(e=>e.Date).IsRequired();
+                entity.Property(e=>e.Time).IsRequired();
             });
             base.OnModelCreating(modelBuilder);
         }

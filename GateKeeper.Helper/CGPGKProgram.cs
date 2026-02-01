@@ -42,6 +42,7 @@ namespace CGPGK
                 .AddScoped<ForeingEmailsApplication>()
                 .AddScoped<LocalMonitoredEmailsApplication>()
                 .AddScoped<HelperApplication>()
+                .AddScoped<BlockedEmailsApplication>()
                 .BuildServiceProvider();
             var scope = serviceProvider.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<DatabaseService>();

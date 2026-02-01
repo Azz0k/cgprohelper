@@ -8,6 +8,7 @@ import {foreignEmailsState} from "../pages/ForeignEmails/ForeignEmailsState.ts";
 import type {LoginPass} from "../interfaces/LoginPass.ts";
 import {Authenticate} from "../services/Authenticate.api.ts";
 import {usersState} from "../pages/Users/UsersState.ts";
+import {blockedEmailsState} from "../pages/BlockedEmails/BlockedEmailsState.ts";
 
 class RootStore {
   globalMenuSelectedKey: string = "1";
@@ -69,7 +70,7 @@ class RootStore {
 
   handleMenuSelected = (e: { key: string; })=>{
     this.globalMenuSelectedKey = e.key;
-    const href = routes[e.key as "1" | "2" | "3"];
+    const href = routes[e.key as "1" | "2" | "3"| "4"| "5"];
     Router.navigate({href}).catch(console.error);
   }
   get localState(): LocalState{
@@ -80,6 +81,8 @@ class RootStore {
         return allowedDomainState;
       case '/users':
         return usersState;
+      case '/blockedemails':
+        return blockedEmailsState;
       default:
         return foreignEmailsState;
     }

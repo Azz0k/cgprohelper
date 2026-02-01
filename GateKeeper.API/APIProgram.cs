@@ -44,6 +44,7 @@ namespace GateKeeper.API
             builder.Services.AddScoped<UserApplication>();
             builder.Services.AddScoped<UserAuthenticationApplication>();
             builder.Services.Configure<ApiSettings>(opt=>opt.JwtSecretCode = secretCode);
+            builder.Services.AddScoped<BlockedEmailsApplication>();
             builder.Services.AddScoped<ApiSettings>();
             //builder.Services.AddAuthorization();
             builder.Services.AddAuthorizationBuilder()

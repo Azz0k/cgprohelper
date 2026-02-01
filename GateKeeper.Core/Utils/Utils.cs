@@ -1,4 +1,5 @@
 ﻿using GateKeeper.Core.Models.ApiModels;
+using GateKeeper.Core.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,9 +29,14 @@ namespace GateKeeper.Core.Utils
         {
             return DateTime.Now.ToString("yyyy-MM-dd");
         }
+        public static string GenerateReceivedTime()
+        {
+            return DateTime.Now.ToString("HH:mm");
+        }
         public static string GenerateDeprecatedDate()
         {
             return DateTime.Now.AddDays(-8).ToString("yyyy-MM-dd");
         }
+
     }
 }

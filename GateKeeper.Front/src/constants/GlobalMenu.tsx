@@ -13,7 +13,10 @@ export const GlobalMenu:MenuItemType[] = [
     key: '3', icon: <ClusterOutlined />, label: 'Разрешенные домены',
   },
   {
-    key: '4', icon: <UserOutlined />,
+    key: '4', icon: <ClusterOutlined />, label: 'Заблокированные письма',
+  },
+  {
+    key: '5', icon: <UserOutlined />,
     label: 'Пользователи',
   },
 ];

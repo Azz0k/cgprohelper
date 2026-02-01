@@ -67,6 +67,7 @@ namespace GateKeeper.Tests
                 .AddScoped<AllowedEmailsApplication>()
                 .AddScoped<ForeingEmailsApplication>()
                 .AddScoped<LocalMonitoredEmailsApplication>()
+                .AddScoped<BlockedEmailsApplication>()
                 .AddScoped<HelperApplication>()
                 .BuildServiceProvider();    
             var scope = serviceProvider.CreateScope();

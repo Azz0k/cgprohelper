@@ -4,5 +4,6 @@ export const routes: RoutesType = {
     "1":"/",
     "2":"/foreignemails",
     "3":"/alloweddomains",
-    "4":"/users"
+    "4":"/blockedemails",
+    "5":"/users"
 };

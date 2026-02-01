@@ -44,13 +44,13 @@ namespace CGPGK.Models
         }
         public async Task<bool> CheckFileAsync()
         {
-            bool isChanged = false;
             var ftp = FTP.GetInstance();
             if (ftp == null) return false;
             var file = await ftp.FileInfo(this);
-            if (this.modifiedTime != file?.ModifiedTime)
-                isChanged = true;
-            return isChanged;
+            if (file == null)  return false;
+            if (this.modifiedTime == file?.ModifiedTime)
+                return false;
+            return true;
         }
         public async Task SaveNewTimeAsync()
         {

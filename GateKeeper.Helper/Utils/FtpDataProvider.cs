@@ -33,38 +33,32 @@ namespace CGPGK.Utils
         {
             _appSettings = appSettings;
         }
-        private async Task ExecuteAsync(Func<AsyncFtpClient, Task> operation)
+        public async Task<MonitoredFile?> FileInfo(MonitoredFile file) 
         {
+            MonitoredFile result = new(file.FullName, file.FileType);
             var connectionSettings = _appSettings.ConnectionSettings;
             try
             {
                 using (var ftp = new AsyncFtpClient(connectionSettings.host, connectionSettings.login, connectionSettings.password))
                 {
                     await ftp.Connect(updateSourceToken);
-                    await operation(ftp);
+                    var items = await ftp.GetListing("/");
+                    foreach (var item in items)
+                    {
+                        if (file.FullName == item.FullName)
+                        {
+                            DateTime time = await ftp.GetModifiedTime(item.FullName);
+                            result = new(file.FullName, file.FileType, time);
+                        }
+                    }
                 }
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine("* Unable to connect to ftp");
                 Console.Error.WriteLine(e.Message);
+                return null;
             }
-        }
-        public async Task<MonitoredFile?> FileInfo(MonitoredFile file) 
-        {
-            MonitoredFile result = new(file.FullName, file.FileType);
-            await ExecuteAsync(async (ftp) =>
-            {
-                var items = await ftp.GetListing("/");
-                foreach (var item in items)
-                {
-                    if (file.FullName == item.FullName)
-                    {
-                        DateTime time =  await ftp.GetModifiedTime(item.FullName);
-                        result = new(file.FullName, file.FileType, time);
-                    }
-                }
-            });
             return result;
         }
         public async Task<HashSet<string>> DownloadFileFromFTPAsync(string fileName)

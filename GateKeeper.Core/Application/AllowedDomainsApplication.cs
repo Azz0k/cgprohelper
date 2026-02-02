@@ -39,12 +39,20 @@ namespace GateKeeper.Core.Application
                 AllowedDomainsDTO dTO = new() { Domain = domain };
                 if (isDomainPatternValid(domain) && !okAdded.Contains(dTO))
                 {
-                    bool isEntityExists = await dbservice.FindAsync<AllowedDomains>(d => d.Domain == domain) == null ? false:true;
-                    if (!isEntityExists)
+                    AllowedDomains? existedEntity = await dbservice.FindAsync<AllowedDomains>(d => d.Domain == domain);
+                    if (existedEntity==null)
                     {
                         var createdEntity = await dbservice.CreateAsync(new AllowedDomains(domain, true));
                         dTO.Id = createdEntity.Id;
                         okAdded.Add(dTO);
+                    }
+                    else
+                    {
+                        if (!existedEntity.isManuallyAdded)
+                        {
+                            await dbservice.UpdateAsync<AllowedDomains>(existedEntity.Id, (AllowedDomains domain) => domain.isManuallyAdded = true);
+                            okAdded.Add(dTO);
+                        }
                     }
                 }
                 if (!okAdded.Contains(dTO))

@@ -106,5 +106,12 @@ namespace GateKeeper.Tests
             response = await _client.PutAsJsonAsync(apiUri, updateRequest);
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
+        [Fact]
+        public async Task BlockedEmailsApi_ShouldAnswer401()
+        {
+            string apiUri = "/api/blockedEmails";
+            var response = await _client.GetAsync(apiUri);
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
     }
 }
